@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Escala Serviço • CBMCE </title>
+    <link rel="icon" type="image/png" href="icone.png">
+    <link rel="apple-touch-icon" href="icone.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-subtle: #e2e8f0;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            
+            --fire-red: #dc2626;
+            --fire-dark: #991b1b;
+            --reflective-yellow: #f59e0b;
+            
+            --work-bg: #fee2e2;
+            --work-text: #991b1b;
+            --work-border: #ef4444;
+            
+            --off-bg: #ecfdf5;
+            --off-text: #065f46;
+            --off-border: #34d399;
+            
+            --permuta-badge: #f59e0b;
+            --note-badge: #2563eb;
+            --today-ring: #f59e0b;
+            --whatsapp: #16a34a;
+            --gcal: #b91c1c;
+        }
+
+        body.dark {
+            --bg: #111827;
+            --card: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-subtle: #374151;
+            --input-bg: #111827;
+            --input-border: #4b5563;
+            
+            --work-bg: #7f1d1d;
+            --work-text: #fee2e2;
+            --work-border: #f87171;
+            
+            --off-bg: #064e3b;
+            --off-text: #d1fae5;
+            --off-border: #10b981;
+            
+            --permuta-badge: #fbbf24;
+            --note-badge: #60a5fa;
+            --today-ring: #fbbf24;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; padding: 12px; background: var(--bg); color: var(--text-main); transition: background 0.2s, color 0.2s; }
+        .container { max-width: 480px; margin: 0 auto; }
+        
+        header {
+            background: var(--card); padding: 16px; border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 12px;
+            border-top: 5px solid var(--fire-red);
+        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        h1 { margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; }
+        
+        .theme-btn {
+            background: var(--off-bg); color: var(--text-main); border: 1px solid var(--border-subtle);
+            padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+        }
+
+        .quote-banner {
+            background: linear-gradient(135deg, #991b1b, #dc2626);
+            color: #ffffff; padding: 10px 12px; border-radius: 10px;
+            margin-bottom: 12px; font-size: 0.82rem; line-height: 1.35;
+            border-left: 4px solid var(--reflective-yellow);
+            cursor: pointer; position: relative;
+        }
+        .quote-text { font-style: italic; font-weight: 500; display: block; }
+        .quote-hint { font-size: 0.65rem; opacity: 0.85; display: block; margin-top: 4px; text-align: right; }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+        input[type="date"], input[type="month"], input[type="text"] {
+            width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 8px;
+            font-size: 0.9rem; background: var(--input-bg); color: var(--text-main);
+        }
+
+        .summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; text-align: center; }
+        .stat { background: var(--bg); padding: 8px; border-radius: 10px; border: 1px solid var(--border-subtle); }
+        .stat span { display: block; font-size: 0.7rem; color: var(--text-muted); }
+        .stat strong { font-size: 1.05rem; color: var(--text-main); }
+
+        .action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .btn-share {
+            padding: 10px 8px; border: none; border-radius: 10px; color: #ffffff; font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px;
+        }
+        .btn-whatsapp { background: var(--whatsapp); }
+        .btn-gcal { background: var(--gcal); }
+
+        .calendar-card { background: var(--card); padding: 12px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .weekdays {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;
+        }
+        .weekdays div:first-child, .weekdays div:last-child { color: var(--fire-red); }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .day-cell {
+            aspect-ratio: 1 / 1.22; border-radius: 10px; padding: 4px;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            cursor: pointer; position: relative; border: 1.5px solid transparent; user-select: none;
+        }
+        .day-cell.empty { background: transparent; cursor: default; }
+        .day-cell.work { background: var(--work-bg); color: var(--work-text); border-color: var(--work-border); }
+        .day-cell.off { background: var(--off-bg); color: var(--off-text); border-color: var(--off-border); }
+        .day-cell.today { box-shadow: 0 0 0 2.5px var(--today-ring); font-weight: 800; }
+        
+        .today-tag {
+            font-size: 0.5rem; background: var(--reflective-yellow); color: #000;
+            padding: 1px 4px; border-radius: 4px; font-weight: 800; line-height: 1;
+        }
+        .day-num { font-size: 0.92rem; font-weight: 700; }
+        .day-label { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
+        
+        .badges { position: absolute; top: 3px; right: 3px; display: flex; gap: 2px; }
+        .dot-permuta { width: 6px; height: 6px; background: var(--permuta-badge); border-radius: 50%; }
+        .dot-note { width: 6px; height: 6px; background: var(--note-badge); border-radius: 50%; }
+
+        .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 12px; font-size: 0.72rem; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .box { width: 11px; height: 11px; border-radius: 3px; }
+        .dot-sample { width: 8px; height: 8px; border-radius: 50%; }
+
+        .modal-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            justify-content: center; align-items: flex-end; z-index: 100; padding: 16px;
+        }
+        .modal-backdrop.open { display: flex; }
+        .modal-box {
+            background: var(--card); color: var(--text-main); width: 100%; max-width: 440px;
+            border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-top: 4px solid var(--fire-red);
+        }
+        .modal-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px 0; }
+        .modal-sub { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 12px 0; }
+        
+        .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .tag-chip {
+            font-size: 0.72rem; padding: 4px 8px; border-radius: 12px;
+            background: var(--bg); border: 1px solid var(--border-subtle);
+            color: var(--text-main); cursor: pointer; font-weight: 600;
+        }
+        .tag-chip:active { background: var(--fire-red); color: #fff; }
+
+        .note-box { margin-bottom: 14px; }
+        .note-row { display: flex; gap: 6px; }
+        .btn-save-note { padding: 0 14px; border-radius: 8px; border: none; background: var(--fire-red); color: #fff; font-weight: 600; cursor: pointer; }
+        
+        .modal-actions { display: flex; flex-direction: column; gap: 8px; }
+        .btn-action {
+            width: 100%; padding: 11px; border-radius: 10px; border: 1px solid var(--border-subtle);
+            background: var(--bg); color: var(--text-main); font-size: 0.88rem; font-weight: 600;
+            text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+        }
+        .btn-action small { font-weight: 400; font-size: 0.74rem; color: var(--text-muted); }
+        .btn-cancel { margin-top: 8px; padding: 10px; width: 100%; border: none; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="top-bar">
+            <h1>🚒 Escala Serviço • Sd Vivian </h1>
+            <button class="theme-btn" id="themeToggle">🌙 Modo Tático</button>
+        </div>
+
+        <div class="quote-banner" id="quoteBanner" title="Toque para ver outra frase">
+            <span class="quote-text" id="quoteText">"Vida alheia e riquezas salvar!"</span>
+            <span class="quote-hint">🔥 Toque para nova frase</span>
+        </div>
+
+        <div class="controls">
+            <div>
+                <label for="baseDate">1º Serviço (24h):</label>
+                <input type="date" id="baseDate">
+            </div>
+            <div>
+                <label for="viewMonth">Mês:</label>
+                <input type="month" id="viewMonth">
+            </div>
+        </div>
+              <div class="summary">
+            <div class="stat"><span>Serviços 24h</span><strong id="countWork">0</strong></div>
+            <div class="stat"><span>Folgas</span><strong id="countOff">0</strong></div>
+            <div class="stat"><span>Saldo Trocas</span><strong id="countBalance">0</strong></div>
+        </div>
+        <div class="action-bar">
+            <button class="btn-share btn-whatsapp" id="btnShareWhatsApp">📲 WhatsApp</button>
+            <button class="btn-share btn-gcal" id="btnExportICS">📅 Google Agenda</button>
+        </div>
+    </header>
+
+    <div class="calendar-card">
+        <div class="weekdays">
+            <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        
+        <div class="legend">
+            <div class="legend-item"><div class="box" style="background:var(--work-bg); border:1px solid var(--work-border);"></div> QAP (Serviço)</div>
+            <div class="legend-item"><div class="box" style="background:var(--off-bg); border:1px solid var(--off-border);"></div> Folga</div>
+            <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Permuta</div>
+            <div class="legend-item"><div class="dot-sample" style="background:var(--note-badge);"></div> Anotação</div>
+            <div class="legend-item"><div class="box" style="border:2px solid var(--today-ring);"></div> Hoje</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="dayModal">
+    <div class="modal-box">
+        <h3 class="modal-title" id="modalDateTitle">Dia 00/00</h3>
+        <p class="modal-sub" id="modalStatusDesc">Status atual: Folga</p>
+        
+        <div class="note-box">
+            <label for="dayNoteInput">Anotação / Posto do dia:</label>
+            <div class="quick-tags">
+                <span class="tag-chip" data-text="🚒 Viatura / ABT">🚒 ABT</span>
+                <span class="tag-chip" data-text="🚑 Resgate / UR">🚑 Resgate</span>
+                <span class="tag-chip" data-text="🏢 Guarda / Quartel">🏢 Guarda</span>
+                <span class="tag-chip" data-text="🔄 Troca de Serviço">🔄 Troca</span>
+            </div>
+            <div class="note-row">
+                <input type="text" id="dayNoteInput" placeholder="Escreva um lembrete...">
+                <button class="btn-save-note" id="btnSaveNote">Salvar</button>
+            </div>
+        </div>
+
+<script>
+   const frasesMotivacionais = [
+        "🔥 Vida alheia e riquezas salvar! Tenha um excelente serviço.",
+        "🚒 Além de não ser fácil, ainda é difícil!",
+        "❤️ Tenho muito orgulho da mulher e da bombeira incrível que você é!",
+        "🛡️ Que seu plantão seja tranquilo, seguro e abençoado. Bom serviço!",
+        "⭐ Onde muitos recuam, você avança para salvar. Força e honra!",
+        "🏡 Quando a vida te derrubar, aproveite a chance e tire uma soneca.",
+        "🔥 Ser bombeira não é apenas uma profissão, é carregar o dom de salvar vidas.",
+        "💪 Vamos nos desesperar com calma",
+        "🚒 Entre o fogo e o perigo, brilha a sua coragem. Bom plantão, meu amor!",
+        "🌟 A vida é uma montanha-russa... Pena que você esqueceu o cinto."
+    ];
+
+    function sortearFrase() {
+        const quoteText = document.getElementById('quoteText');
+        const atual = quoteText.textContent;
+        let nova = atual;
+        while (nova === atual && frasesMotivacionais.length > 1) {
+            const idx = Math.floor(Math.random() * frasesMotivacionais.length);
+            nova = '"' + frasesMotivacionais[idx] + '"';
+        }
+        quoteText.textContent = nova;
+    }
+
+    document.getElementById('quoteBanner').onclick = sortearFrase;
+    sortearFrase();
+
+    const baseDateInput = document.getElementById('baseDate');
+    const viewMonthInput = document.getElementById('viewMonth');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const themeToggle = document.getElementById('themeToggle');
+    const dayModal = document.getElementById('dayModal');
+    const dayNoteInput = document.getElementById('dayNoteInput');
+
+    document.querySelectorAll('.tag-chip').forEach(function(chip) {
+        chip.onclick = function() {
+            const val = chip.getAttribute('data-text');
+            dayNoteInput.value = dayNoteInput.value ? dayNoteInput.value + ' • ' + val : val;
+        };
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedPayload = urlParams.get('dados');
+
+    if (sharedPayload) {
+        try {
+            const decoded = JSON.parse(decodeURIComponent(atob(sharedPayload)));
+            if (decoded.b) localStorage.setItem('escala_baseDate', decoded.b);
+            if (decoded.p) localStorage.setItem('escala_permutas', JSON.stringify(decoded.p));
+            if (decoded.n) localStorage.setItem('escala_notes', JSON.stringify(decoded.n));
+            if (decoded.r) localStorage.setItem('escala_reinicios', JSON.stringify(decoded.r));
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    const today = new Date();
+    const todayKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+    let savedBase = localStorage.getItem('escala_baseDate') || todayKey;
+    let permutas = JSON.parse(localStorage.getItem('escala_permutas') || '{}');
+    let notes = JSON.parse(localStorage.getItem('escala_notes') || '{}');
+    let reinicios = JSON.parse(localStorage.getItem('escala_reinicios') || '[]');
+    let isDark = localStorage.getItem('escala_dark') === 'true';
+
+    if (isDark) {
+        document.body.classList.add('dark');
+        themeToggle.textContent = '☀️ Modo Claro';
+    }
+
+    themeToggle.onclick = function() {
+        isDark = !isDark;
+        document.body.classList.toggle('dark', isDark);
+        themeToggle.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Tático';
+        localStorage.setItem('escala_dark', isDark);
+    };
+
+    baseDateInput.value = savedBase;
+    viewMonthInput.value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+
+    let selectedDateKey = null;
+    let selectedIsBaseWork = false;
+    let selectedHasPermuta = false;
+    let selectedIsFinalWork = false;
+    let currentMonthEvents = [];
+
+    function parseLocalDate(dateStr) {
+        const y = Number(dateStr.slice(0, 4));
+        const m = Number(dateStr.slice(5, 7));
+        const d = Number(dateStr.slice(8, 10));
+        return new Date(y, m - 1, d);
+    }
+
+    function getEffectiveBaseDateStr(dateKey) {
+        let effective = baseDateInput.value;
+        for (let i = 0; i < reinicios.length; i++) {
+            if (reinicios[i] <= dateKey) {
+                effective = reinicios[i];
+            } else {
+                break;
+            }
+        }
+        return effective;
+    }
+
+    function get24hShiftRange(dateKey) {
+        const y = Number(dateKey.slice(0, 4));
+        const m = Number(dateKey.slice(5, 7));
+        const d = Number(dateKey.slice(8, 10));
+        const startDateStr = '' + y + String(m).padStart(2, '0') + String(d).padStart(2, '0') + 'T080000';
+        const nextDayObj = new Date(y, m - 1, d + 1);
+        const endDateStr = '' + nextDayObj.getFullYear() + String(nextDayObj.getMonth() + 1).padStart(2, '0') + String(nextDayObj.getDate()).padStart(2, '0') + 'T080000';
+        return { startDateStr: startDateStr, endDateStr: endDateStr };
+    }
+
+    function openDayOptions(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork) {
+        selectedDateKey = dateKey;
+        selectedIsBaseWork = isBaseWork;
+        selectedHasPermuta = hasPermuta;
+        selectedIsFinalWork = isFinalWork;
+
+        document.getElementById('modalDateTitle').textContent = 'Data: ' + displayDate;
+        document.getElementById('modalStatusDesc').textContent = 'Status atual: ' + (isFinalWork ? 'QAP (SERVIÇO 24H)' : 'FOLGA') + (hasPermuta ? ' • com permuta' : '');
+        dayNoteInput.value = notes[dateKey] || '';
+
+        const btnPermutaTitle = document.getElementById('btnPermutaTitle');
+        const btnPermutaDesc = document.getElementById('btnPermutaDesc');
+
+        if (hasPermuta) {
+            btnPermutaTitle.textContent = '↩️ Desfazer Permuta Pontual';
+            btnPermutaDesc.textContent = 'Volta este dia para a escala original 1x3.';
+        } else {
+            btnPermutaTitle.textContent = '🔄 Trocar apenas este dia para ' + (isBaseWork ? 'FOLGA' : 'QAP (SERVIÇO)');
+            btnPermutaDesc.textContent = 'Ideal para permuta 2x6 sem alterar o ciclo futuro.';
+        }
+
+        dayModal.classList.add('open');
+    }
+
+    document.getElementById('btnSaveNote').onclick = function() {
+        const text = dayNoteInput.value.trim();
+        if (text) {
+            notes[selectedDateKey] = text;
+        } else {
+            delete notes[selectedDateKey];
+        }
+        localStorage.setItem('escala_notes', JSON.stringify(notes));
+        dayModal.classList.remove('open');
+        render();
+    };
+
+    document.getElementById('btnTogglePermuta').onclick = function() {
+        if (selectedHasPermuta) {
+            delete permutas[selectedDateKey];
+        } else {
+            permutas[selectedDateKey] = !selectedIsBaseWork;
+        }
+        localStorage.setItem('escala_permutas', JSON.stringify(permutas));
+        dayModal.classList.remove('open');
+        render();
+    };
+
+    document.getElementById('btnRecalcFromHere').onclick = function() {
+        if (selectedDateKey <= baseDateInput.value) {
+            baseDateInput.value = selectedDateKey;
+            localStorage.setItem('escala_baseDate', selectedDateKey);
+            reinicios = [];
+        } else {
+            reinicios = reinicios.filter(function(r) { return r < selectedDateKey; });
+            reinicios.push(selectedDateKey);
+            reinicios.sort();
+        }
+        localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
+
+        Object.keys(permutas).forEach(function(k) {
+            if (k >= selectedDateKey) delete permutas[k];
+        });
+        localStorage.setItem('escala_permutas', JSON.stringify(permutas));
+
+        dayModal.classList.remove('open');
+        render();
+    };
+
+    document.getElementById('btnSingleGCal').onclick = function() {
+        const range = get24hShiftRange(selectedDateKey);
+        const title = selectedIsFinalWork ? '🚒 Serviço 24h (Escala 1x3)' : '🏡 Folga (Escala 1x3)';
+        const details = notes[selectedDateKey] || (selectedHasPermuta ? 'Dia alterado por permuta (08:00 às 08:00)' : 'Plantão 24h: 08:00 às 08:00');
+        const gcalUrl = 'https://google.com' + encodeURIComponent(title) + '&dates=' + range.startDateStr + '/' + range.endDateStr + '&details=' + encodeURIComponent(details);
+        window.open(gcalUrl, '_blank');
+    };
+
+    document.getElementById('btnExportICS').onclick = function() {
+        const workEvents = currentMonthEvents.filter(function(e) { return e.isFinalWork; });
+        if (workEvents.length === 0) {
+            alert('Não há dias de serviço neste mês para exportar.');
+            return;
+        }
+
+        let icsLines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Escala QAP Bombeira//PT-BR',
+            'CALSCALE:GREGORIAN'
+        ];
+  
+
+        workEvents.forEach(function(ev) {
+            const range = get24hShiftRange(ev.dateKey);
+		const summary = ev.hasPermuta ? '🚒 Serviço 24h (Permuta)' : '🚒 Serviço 24h (QAP)';
+		const desc = ev.note ? ev.note : 'Turno de 24h: 08:00 às 08:00 do dia seguinte';
+		icsLines.push(
+		'BEGIN:VEVENT',
+'UID:' + ev.dateKey + '-escala1x3@folhinha',
+'DTSTAMP:' + range.startDateStr,
+'DTSTART:' + range.startDateStr,
+'DTEND:' + range.endDateStr,
+'SUMMARY:' + summary,
+'DESCRIPTION:' + desc,
+'END:VEVENT'
+);
+});
+icsLines.push('END:VCALENDAR');
+const blob = new Blob([icsLines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+const link = document.createElement('a');
+link.href = URL.createObjectURL(blob);
+link.download = 'escala-qap-' + viewMonthInput.value + '.ics';
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+};
+document.getElementById('btnShareWhatsApp').onclick = function() {
+const payload = {
+b: baseDateInput.value,
+p: permutas,
+n: notes,
+r: reinicios
+};
+const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
+const baseUrl = window.location.origin + window.location.pathname;
+const shareUrl = baseUrl + '?dados=' + encoded;
+const y = viewMonthInput.value.slice(0, 4);
+const m = viewMonthInput.value.slice(5, 7);
+const message = Prezado, segue minha escala do mês *${m}/${y} atualizada* (Plantão 24h • Entrada 08h):\n\n${shareUrl};
+const whatsappUrl = 'whatsapp.com' + encodeURIComponent(message);
+window.open(whatsappUrl, '_blank');
+};
+document.getElementById('btnCloseModal').onclick = function() { dayModal.classList.remove('open'); };
+dayModal.onclick = function(e) { if (e.target === dayModal) dayModal.classList.remove('open'); };
+function render() {
+const year = Number(viewMonthInput.value.slice(0, 4));
+const month = Number(viewMonthInput.value.slice(5, 7));
+const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
+const daysInMonth = new Date(year, month, 0).getDate();
+calendarGrid.innerHTML = '';
+currentMonthEvents = [];
+let workCount = 0;
+let offCount = 0;
+let baseWorkCount = 0;
+for (let i = 0; i < firstDayOfWeek; i++) {
+const emptyCell = document.createElement('div');
+emptyCell.className = 'day-cell empty';
+calendarGrid.appendChild(emptyCell);
+}
+for (let d = 1; d <= daysInMonth; d++) {
+const dateKey = year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+const displayDate = String(d).padStart(2, '0') + '/' + String(month).padStart(2, '0') + '/' + year;
+const effectiveBase = parseLocalDate(getEffectiveBaseDateStr(dateKey));
+const utcCurrent = Date.UTC(year, month - 1, d);
+const utcBase = Date.UTC(effectiveBase.getFullYear(), effectiveBase.getMonth(), effectiveBase.getDate());
+const diffDays = Math.floor((utcCurrent - utcBase) / (1000 * 60 * 60 * 24));
+const mod = ((diffDays % 4) + 4) % 4;
+const isBaseWork = (mod === 0);
+if (isBaseWork) baseWorkCount++;
+const hasPermuta = permutas.hasOwnProperty(dateKey);
+const hasNote = notes.hasOwnProperty(dateKey) && notes[dateKey].trim() !== '';
+const isFinalWork = hasPermuta ? permutas[dateKey] : isBaseWork;
+if (isFinalWork) workCount++; else offCount++;
+currentMonthEvents.push({
+dateKey: dateKey,
+isFinalWork: isFinalWork,
+hasPermuta: hasPermuta,
+note: notes[dateKey] || ''
+});
+const cell = document.createElement('div');
+const isToday = (dateKey === todayKey);
+cell.className = 'day-cell ' + (isFinalWork ? 'work' : 'off') + (isToday ? ' today' : '');
+const badgesDiv = document.createElement('div');
+badgesDiv.className = 'badges';
+if (hasPermuta) {
+const dotP = document.createElement('div');
+dotP.className = 'dot-permuta';
+badgesDiv.appendChild(dotP);
+}
+if (hasNote) {
+const dotN = document.createElement('div');
+dotN.className = 'dot-note';
+badgesDiv.appendChild(dotN);
+}
+cell.appendChild(badgesDiv);
+const numSpan = document.createElement('span');
+numSpan.className = 'day-num';
+numSpan.textContent = d;
+cell.appendChild(numSpan);
+if (isToday) {
+const todaySpan = document.createElement('span');
+todaySpan.className = 'today-tag';
+todaySpan.textContent = 'HOJE';
+cell.appendChild(todaySpan);
+}
+const labelSpan = document.createElement('span');
+labelSpan.className = 'day-label';
+labelSpan.textContent = isFinalWork ? 'QAP' : 'Folga';
+cell.appendChild(labelSpan);
+cell.onclick = (function(dk, dd, ibw, hp, ifw) {
+return function() { openDayOptions(dk, dd, ibw, hp, ifw); };
+})(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork);
+calendarGrid.appendChild(cell);
+}
+document.getElementById('countWork').textContent = workCount;
+document.getElementById('countOff').textContent = offCount;
+const balance = workCount - baseWorkCount;
+document.getElementById('countBalance').textContent = balance > 0 ? '+' + balance : balance;
+}
+baseDateInput.addEventListener('change', function() {
+localStorage.setItem('escala_baseDate', baseDateInput.value);
+reinicios = [];
+localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
+render();
+});
+viewMonthInput.addEventListener('change', render);
+render();
