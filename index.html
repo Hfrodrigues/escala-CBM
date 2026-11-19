@@ -243,7 +243,23 @@
                 <button class="btn-save-note" id="btnSaveNote">Salvar</button>
             </div>
         </div>
-
+ <div class="modal-actions">
+            <button class="btn-action" id="btnTogglePermuta">
+                <span id="btnPermutaTitle">🔄 Fazer Permuta Pontual (2x6)</span>
+                <small id="btnPermutaDesc">Altera apenas este dia sem mudar o restante da escala.</small>
+            </button>
+            <button class="btn-action" id="btnRecalcFromHere">
+                <span>📅 Reiniciar Ciclo 1x3 a partir desta data</span>
+                <small>Altera apenas daqui para frente, mantendo o passado intacto.</small>
+            </button>
+            <button class="btn-action" id="btnSingleGCal">
+                <span>🗓️ Salvar este dia no Google Agenda</span>
+                <small>Plantão 24h: das 08:00 até as 08:00 do dia seguinte.</small>
+            </button>
+        </div>
+        <button class="btn-cancel" id="btnCloseModal">Fechar</button>
+    </div>
+</div>
 <script>
    const frasesMotivacionais = [
         "🔥 Vida alheia e riquezas salvar! Tenha um excelente serviço.",
