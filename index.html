@@ -243,7 +243,7 @@
                 <button class="btn-save-note" id="btnSaveNote">Salvar</button>
             </div>
         </div>
- <div class="modal-actions">
+  <div class="modal-actions">
             <button class="btn-action" id="btnTogglePermuta">
                 <span id="btnPermutaTitle">🔄 Fazer Permuta Pontual (2x6)</span>
                 <small id="btnPermutaDesc">Altera apenas este dia sem mudar o restante da escala.</small>
@@ -505,8 +505,8 @@
 		const shareUrl = baseUrl + '?dados=' + encoded;
 		const y = viewMonthInput.value.slice(0, 4);
 		const m = viewMonthInput.value.slice(5, 7);
-		const message = Prezado, segue minha escala do mês *${m}/${y} atualizada* (Plantão 24h • Entrada 08h):\n\n${shareUrl};
-		const whatsappUrl = 'whatsapp.com' + encodeURIComponent(message);
+		const message = `Prezado, segue minha escala do mês *${m}/${y} atualizada* (Plantão 24h • Entrada 08h):\n\n${shareUrl}`;
+		const whatsappUrl = 'https://whatsapp.com' + encodeURIComponent(message);
 		window.open(whatsappUrl, '_blank');
 		};
 		document.getElementById('btnCloseModal').onclick = function() { dayModal.classList.remove('open'); };
@@ -595,3 +595,6 @@
 		});
 		viewMonthInput.addEventListener('change', render);
 		render();
+</script>
+</body>
+</html>
