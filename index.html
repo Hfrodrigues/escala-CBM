@@ -258,6 +258,13 @@
         "🌟 A vida é uma montanha-russa... Pena que você esqueceu o cinto."
     ];
 
+    const baseDateInput = document.getElementById('baseDate');
+    const viewMonthInput = document.getElementById('viewMonth');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const themeToggle = document.getElementById('themeToggle');
+    const dayModal = document.getElementById('dayModal');
+    const dayNoteInput = document.getElementById('dayNoteInput');
+
     function sortearFrase() {
         const quoteText = document.getElementById('quoteText');
         const atual = quoteText.textContent;
@@ -271,13 +278,6 @@
 
     document.getElementById('quoteBanner').onclick = sortearFrase;
     sortearFrase();
-
-    const baseDateInput = document.getElementById('baseDate');
-    const viewMonthInput = document.getElementById('viewMonth');
-    const calendarGrid = document.getElementById('calendarGrid');
-    const themeToggle = document.getElementById('themeToggle');
-    const dayModal = document.getElementById('dayModal');
-    const dayNoteInput = document.getElementById('dayNoteInput');
 
     document.querySelectorAll('.tag-chip').forEach(function(chip) {
         chip.onclick = function() {
@@ -431,7 +431,7 @@
 
     document.getElementById('btnSingleGCal').onclick = function() {
         const range = get24hShiftRange(selectedDateKey);
-        const title = selectedIsFinalWork ? '🚒 Serviço 24h (Escala 1x3)' : '🏡 Folga (Escala 1x3)';
+        const title = selectedIsFinalWork ? '🚒 Serviço 24h • Sd Vivian' : '🏡 Folga • Sd Vivian';
         const details = notes[selectedDateKey] || (selectedHasPermuta ? 'Dia alterado por permuta (08:00 às 08:00)' : 'Plantão 24h: 08:00 às 08:00');
         const gcalUrl = 'https://google.com' + encodeURIComponent(title) + '&dates=' + range.startDateStr + '/' + range.endDateStr + '&details=' + encodeURIComponent(details);
         window.open(gcalUrl, '_blank');
@@ -447,133 +447,135 @@
         let icsLines = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
-            'PRODID:-//Escala QAP Bombeira//PT-BR',
+            'PRODID:-//Escala Sd Vivian//PT-BR',
             'CALSCALE:GREGORIAN'
         ];
-  
 
         workEvents.forEach(function(ev) {
             const range = get24hShiftRange(ev.dateKey);
-		const summary = ev.hasPermuta ? '🚒 Serviço 24h (Permuta)' : '🚒 Serviço 24h (QAP)';
-		const desc = ev.note ? ev.note : 'Turno de 24h: 08:00 às 08:00 do dia seguinte';
-		icsLines.push(
-		'BEGIN:VEVENT',
-'UID:' + ev.dateKey + '-escala1x3@folhinha',
-'DTSTAMP:' + range.startDateStr,
-'DTSTART:' + range.startDateStr,
-'DTEND:' + range.endDateStr,
-'SUMMARY:' + summary,
-'DESCRIPTION:' + desc,
-'END:VEVENT'
-);
-});
-icsLines.push('END:VCALENDAR');
-const blob = new Blob([icsLines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-const link = document.createElement('a');
-link.href = URL.createObjectURL(blob);
-link.download = 'escala-qap-' + viewMonthInput.value + '.ics';
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
-};
-document.getElementById('btnShareWhatsApp').onclick = function() {
-const payload = {
-b: baseDateInput.value,
-p: permutas,
-n: notes,
-r: reinicios
-};
-const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
-const baseUrl = window.location.origin + window.location.pathname;
-const shareUrl = baseUrl + '?dados=' + encoded;
-const y = viewMonthInput.value.slice(0, 4);
-const m = viewMonthInput.value.slice(5, 7);
-const message = Prezado, segue minha escala do mês *${m}/${y} atualizada* (Plantão 24h • Entrada 08h):\n\n${shareUrl};
-const whatsappUrl = 'whatsapp.com' + encodeURIComponent(message);
-window.open(whatsappUrl, '_blank');
-};
-document.getElementById('btnCloseModal').onclick = function() { dayModal.classList.remove('open'); };
-dayModal.onclick = function(e) { if (e.target === dayModal) dayModal.classList.remove('open'); };
-function render() {
-const year = Number(viewMonthInput.value.slice(0, 4));
-const month = Number(viewMonthInput.value.slice(5, 7));
-const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
-const daysInMonth = new Date(year, month, 0).getDate();
-calendarGrid.innerHTML = '';
-currentMonthEvents = [];
-let workCount = 0;
-let offCount = 0;
-let baseWorkCount = 0;
-for (let i = 0; i < firstDayOfWeek; i++) {
-const emptyCell = document.createElement('div');
-emptyCell.className = 'day-cell empty';
-calendarGrid.appendChild(emptyCell);
-}
-for (let d = 1; d <= daysInMonth; d++) {
-const dateKey = year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-const displayDate = String(d).padStart(2, '0') + '/' + String(month).padStart(2, '0') + '/' + year;
-const effectiveBase = parseLocalDate(getEffectiveBaseDateStr(dateKey));
-const utcCurrent = Date.UTC(year, month - 1, d);
-const utcBase = Date.UTC(effectiveBase.getFullYear(), effectiveBase.getMonth(), effectiveBase.getDate());
-const diffDays = Math.floor((utcCurrent - utcBase) / (1000 * 60 * 60 * 24));
-const mod = ((diffDays % 4) + 4) % 4;
-const isBaseWork = (mod === 0);
-if (isBaseWork) baseWorkCount++;
-const hasPermuta = permutas.hasOwnProperty(dateKey);
-const hasNote = notes.hasOwnProperty(dateKey) && notes[dateKey].trim() !== '';
-const isFinalWork = hasPermuta ? permutas[dateKey] : isBaseWork;
-if (isFinalWork) workCount++; else offCount++;
-currentMonthEvents.push({
-dateKey: dateKey,
-isFinalWork: isFinalWork,
-hasPermuta: hasPermuta,
-note: notes[dateKey] || ''
-});
-const cell = document.createElement('div');
-const isToday = (dateKey === todayKey);
-cell.className = 'day-cell ' + (isFinalWork ? 'work' : 'off') + (isToday ? ' today' : '');
-const badgesDiv = document.createElement('div');
-badgesDiv.className = 'badges';
-if (hasPermuta) {
-const dotP = document.createElement('div');
-dotP.className = 'dot-permuta';
-badgesDiv.appendChild(dotP);
-}
-if (hasNote) {
-const dotN = document.createElement('div');
-dotN.className = 'dot-note';
-badgesDiv.appendChild(dotN);
-}
-cell.appendChild(badgesDiv);
-const numSpan = document.createElement('span');
-numSpan.className = 'day-num';
-numSpan.textContent = d;
-cell.appendChild(numSpan);
-if (isToday) {
-const todaySpan = document.createElement('span');
-todaySpan.className = 'today-tag';
-todaySpan.textContent = 'HOJE';
-cell.appendChild(todaySpan);
-}
-const labelSpan = document.createElement('span');
-labelSpan.className = 'day-label';
-labelSpan.textContent = isFinalWork ? 'QAP' : 'Folga';
-cell.appendChild(labelSpan);
-cell.onclick = (function(dk, dd, ibw, hp, ifw) {
-return function() { openDayOptions(dk, dd, ibw, hp, ifw); };
-})(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork);
-calendarGrid.appendChild(cell);
-}
-document.getElementById('countWork').textContent = workCount;
-document.getElementById('countOff').textContent = offCount;
-const balance = workCount - baseWorkCount;
-document.getElementById('countBalance').textContent = balance > 0 ? '+' + balance : balance;
-}
-baseDateInput.addEventListener('change', function() {
-localStorage.setItem('escala_baseDate', baseDateInput.value);
-reinicios = [];
-localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
-render();
-});
-viewMonthInput.addEventListener('change', render);
-render();
+            const summary = ev.hasPermuta ? '🚒 Serviço 24h (Permuta)' : '🚒 Serviço 24h (QAP)';
+            const desc = ev.note ? ev.note : 'Turno de 24h: 08:00 às 08:00 do dia seguinte';
+
+            icsLines.push(
+                'BEGIN:VEVENT',
+                'UID:' + ev.dateKey + '-escala1x3@sdvivian',
+                'DTSTAMP:' + range.startDateStr,
+                'DTSTART:' + range.startDateStr,
+                'DTEND:' + range.endDateStr,
+                'SUMMARY:' + summary,
+                'DESCRIPTION:' + desc,
+                'END:VEVENT'
+            );
+        });
+
+		icsLines.push('END:VCALENDAR');
+		const blob = new Blob([icsLines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(blob);
+		link.download = 'escala-sd-vivian-' + viewMonthInput.value + '.ics';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		};
+		document.getElementById('btnShareWhatsApp').onclick = function() {
+		const payload = {
+		b: baseDateInput.value,
+		p: permutas,
+		n: notes,
+		r: reinicios
+		};
+		const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
+		const baseUrl = window.location.origin + window.location.pathname;
+		const shareUrl = baseUrl + '?dados=' + encoded;
+		const y = viewMonthInput.value.slice(0, 4);
+		const m = viewMonthInput.value.slice(5, 7);
+		const message = Prezado, segue minha escala do mês *${m}/${y} atualizada* (Plantão 24h • Entrada 08h):\n\n${shareUrl};
+		const whatsappUrl = 'whatsapp.com' + encodeURIComponent(message);
+		window.open(whatsappUrl, '_blank');
+		};
+		document.getElementById('btnCloseModal').onclick = function() { dayModal.classList.remove('open'); };
+		dayModal.onclick = function(e) { if (e.target === dayModal) dayModal.classList.remove('open'); };
+		function render() {
+		if (!baseDateInput.value || !viewMonthInput.value) return;
+		const year = Number(viewMonthInput.value.slice(0, 4));
+		const month = Number(viewMonthInput.value.slice(5, 7));
+		const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
+		const daysInMonth = new Date(year, month, 0).getDate();
+		calendarGrid.innerHTML = '';
+		currentMonthEvents = [];
+		let workCount = 0;
+		let offCount = 0;
+		let baseWorkCount = 0;
+		for (let i = 0; i < firstDayOfWeek; i++) {
+		const emptyCell = document.createElement('div');
+		emptyCell.className = 'day-cell empty';
+		calendarGrid.appendChild(emptyCell);
+		}
+		for (let d = 1; d <= daysInMonth; d++) {
+		const dateKey = year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+		const displayDate = String(d).padStart(2, '0') + '/' + String(month).padStart(2, '0') + '/' + year;
+		const effectiveBase = parseLocalDate(getEffectiveBaseDateStr(dateKey));
+		const utcCurrent = Date.UTC(year, month - 1, d);
+		const utcBase = Date.UTC(effectiveBase.getFullYear(), effectiveBase.getMonth(), effectiveBase.getDate());
+		const diffDays = Math.floor((utcCurrent - utcBase) / (1000 * 60 * 60 * 24));
+		const mod = ((diffDays % 4) + 4) % 4;
+		const isBaseWork = (mod === 0);
+		if (isBaseWork) baseWorkCount++;
+		const hasPermuta = permutas.hasOwnProperty(dateKey);
+		const hasNote = notes.hasOwnProperty(dateKey) && notes[dateKey].trim() !== '';
+		const isFinalWork = hasPermuta ? permutas[dateKey] : isBaseWork;
+		if (isFinalWork) workCount++; else offCount++;
+		currentMonthEvents.push({
+		dateKey: dateKey,
+		isFinalWork: isFinalWork,
+		hasPermuta: hasPermuta,
+		note: notes[dateKey] || ''
+		});
+		const cell = document.createElement('div');
+		const isToday = (dateKey === todayKey);
+		cell.className = 'day-cell ' + (isFinalWork ? 'work' : 'off') + (isToday ? ' today' : '');
+		const badgesDiv = document.createElement('div');
+		badgesDiv.className = 'badges';
+		if (hasPermuta) {
+		const dotP = document.createElement('div');
+		dotP.className = 'dot-permuta';
+		badgesDiv.appendChild(dotP);
+		}
+		if (hasNote) {
+		const dotN = document.createElement('div');
+		dotN.className = 'dot-note';
+		badgesDiv.appendChild(dotN);
+		}
+		cell.appendChild(badgesDiv);
+		const numSpan = document.createElement('span');
+		numSpan.className = 'day-num';
+		numSpan.textContent = d;
+		cell.appendChild(numSpan);
+		if (isToday) {
+		const todaySpan = document.createElement('span');
+		todaySpan.className = 'today-tag';
+		todaySpan.textContent = 'HOJE';
+		cell.appendChild(todaySpan);
+		}
+		const labelSpan = document.createElement('span');
+		labelSpan.className = 'day-label';
+		labelSpan.textContent = isFinalWork ? 'QAP' : 'Folga';
+		cell.appendChild(labelSpan);
+		cell.onclick = (function(dk, dd, ibw, hp, ifw) {
+		return function() { openDayOptions(dk, dd, ibw, hp, ifw); };
+		})(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork);
+		calendarGrid.appendChild(cell);
+		}
+		document.getElementById('countWork').textContent = workCount;
+		document.getElementById('countOff').textContent = offCount;
+		const balance = workCount - baseWorkCount;
+		document.getElementById('countBalance').textContent = balance > 0 ? '+' + balance : balance;
+		}
+		baseDateInput.addEventListener('change', function() {
+		localStorage.setItem('escala_baseDate', baseDateInput.value);
+		reinicios = [];
+		localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
+		render();
+		});
+		viewMonthInput.addEventListener('change', render);
+		render();
