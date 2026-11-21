@@ -171,12 +171,12 @@
         }
         .btn-action small { font-weight: 400; font-size: 0.74rem; color: var(--text-muted); }
         .btn-cancel { margin-top: 8px; padding: 10px; width: 100%; border: none; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; }
-		.dsro-tag { font-size: 0.48rem; background: var(--dsro-bg); color: #fff; padding: 1px 4px; border-radius: 4px; font-weight: 800; line-height: 1; }
+		.dsro-tag { font-size: 0.48rem; background: var(--dsro-bg); color: #7c3aed; padding: 1px 4px; border-radius: 4px; font-weight: 800; line-height: 1; }
         .posto-icon { font-size: 0.78rem; line-height: 1; }
         .dsro-box { margin-bottom: 12px; padding: 10px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border-subtle); }
         .dsro-btns { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 6px; margin-top: 6px; }
         .btn-dsro { padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--card); color: var(--text-main); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-        .btn-dsro.active { background: var(--dsro-bg); color: #fff; border-color: var(--dsro-bg); }
+        .btn-dsro.active { background: var(--dsro-bg); color: #7c3aed; border-color: var(--dsro-bg); }
 		
     </style>
 </head>
@@ -224,7 +224,7 @@
         <div class="legend">
             <div class="legend-item"><div class="box" style="background:var(--work-bg); border:1px solid var(--work-border);"></div> QAP (Serviço)</div>
             <div class="legend-item"><div class="box" style="background:var(--off-bg); border:1px solid var(--off-border);"></div> Folga</div>
-            <div class="legend-item"><div class="box" style="background:var(--dsro-bg);"></div> DSRO</div>
+            <div class="legend-item"><span style="color:#7c3aed; font-size:1rem; line-height:1;">★</span> DSRO</div>
             <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Permuta</div>
             <div class="legend-item"><div class="box" style="border:2px solid var(--today-ring);"></div> Hoje</div>
         </div>
@@ -645,7 +645,7 @@
             if (dsroHours > 0) {
                 const dsroSpan = document.createElement('span');
                 dsroSpan.className = 'dsro-tag';
-                dsroSpan.textContent = 'DSRO ' + dsroHours + 'h';
+                dsroSpan.textContent = '★' + dsroHours + 'h';
                 cell.appendChild(dsroSpan);
             }
 		else if (isToday) {
