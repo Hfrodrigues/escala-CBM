@@ -648,12 +648,12 @@
                 dsroSpan.textContent = 'DSRO ' + dsroHours + 'h';
                 cell.appendChild(dsroSpan);
             }
-		else (isToday) {
-		const todaySpan = document.createElement('span');
-		todaySpan.className = 'today-tag';
-		todaySpan.textContent = 'HOJE';
-		cell.appendChild(todaySpan);
-		}
+		else if (isToday) {
+                const todaySpan = document.createElement('span');
+                todaySpan.className = 'today-tag';
+                todaySpan.textContent = 'HOJE';
+                cell.appendChild(todaySpan);
+            }
 		const labelSpan = document.createElement('span');
 		labelSpan.className = 'day-label';
 		labelSpan.textContent = isFinalWork ? 'QAP' : 'Folga';
