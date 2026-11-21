@@ -7,6 +7,8 @@
     <link rel="icon" type="image/png" href="icone.png">
     <link rel="apple-touch-icon" href="icone.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
+	 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<script src="https://cloudflare.com"></script>
     <style>
         :root {
             --bg: #f8fafc;
@@ -214,8 +216,7 @@
             <button class="btn-share btn-gcal" id="btnExportICS">📅 Google Agenda</button>
         </div>
     </header>
-
-    <div class="calendar-card">
+ 	<div class="calendar-card" id="captureArea">
         <div class="weekdays">
             <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
         </div>
@@ -555,14 +556,53 @@
 		link.click();
 		document.body.removeChild(link);
 		};
-		document.getElementById('btnShareWhatsApp').onclick = function() {
-		const payload = {
-            b: baseDateInput.value,
-            p: permutas,
-            n: notes,
-            r: reinicios,
-            d: dsroMap
-        };
+		  document.getElementById('btnShareWhatsApp').onclick = function() {
+        const btn = document.getElementById('btnShareWhatsApp');
+        const originalText = btn.textContent;
+        btn.textContent = '⏳ Gerando print...';
+        btn.disabled = true;
+
+        const captureEl = document.getElementById('captureArea');
+        const y = viewMonthInput.value.slice(0, 4);
+        const m = viewMonthInput.value.slice(5, 7);
+        const bgColor = isDark ? '#1f2937' : '#ffffff';
+
+        html2canvas(captureEl, {
+            backgroundColor: bgColor,
+            scale: 2,
+            useCORS: true
+        }).then(function(canvas) {
+            canvas.toBlob(function(blob) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+
+                const fileName = 'escala-cbmce-' + m + '-' + y + '.png';
+                const file = new File([blob], fileName, { type: 'image/png' });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    navigator.share({
+                        files: [file],
+                        title: 'Escala CBMCE ' + m + '/' + y,
+                        text: 'Prezado, segue minha escala do mês *' + m + '/' + y + ' atualizada* (Plantão 24h • Entrada 08h).'
+                    }).catch(function(err) {
+                        console.log('Compartilhamento cancelado:', err);
+                    });
+                } else {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    alert('Print salvo! Agora é só anexar a imagem baixada no WhatsApp.');
+                }
+            }, 'image/png');
+        }).catch(function(err) {
+            btn.textContent = originalText;
+            btn.disabled = false;
+            alert('Erro ao gerar print: ' + err);
+        });
+    };
 		const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
 		const baseUrl = window.location.origin + window.location.pathname;
 		const shareUrl = baseUrl + '?dados=' + encoded;
