@@ -322,6 +322,7 @@
             if (decoded.p) localStorage.setItem('escala_permutas', JSON.stringify(decoded.p));
             if (decoded.n) localStorage.setItem('escala_notes', JSON.stringify(decoded.n));
             if (decoded.r) localStorage.setItem('escala_reinicios', JSON.stringify(decoded.r));
+			 if (decoded.d) localStorage.setItem('escala_dsro', JSON.stringify(decoded.d));
             window.history.replaceState({}, document.title, window.location.pathname);
         } catch (e) {
             console.error(e);
@@ -335,6 +336,7 @@
     let permutas = JSON.parse(localStorage.getItem('escala_permutas') || '{}');
     let notes = JSON.parse(localStorage.getItem('escala_notes') || '{}');
     let reinicios = JSON.parse(localStorage.getItem('escala_reinicios') || '[]');
+	let dsroMap = JSON.parse(localStorage.getItem('escala_dsro') || '{}');
     let isDark = localStorage.getItem('escala_dark') === 'true';
 
     if (isDark) {
@@ -357,6 +359,29 @@
     let selectedHasPermuta = false;
     let selectedIsFinalWork = false;
     let currentMonthEvents = [];
+
+	 function getPostoIcon(noteText) {
+        if (!noteText) return '';
+        const text = noteText.trim();
+        if (text.includes('🚒') || text.toLowerCase().includes('abt')) return '🚒';
+        if (text.includes('🚑') || text.toLowerCase().includes('resgate') || text.toLowerCase().includes('ur')) return '🚑';
+        if (text.includes('🏢') || text.toLowerCase().includes('guarda')) return '🏢';
+        if (text.includes('🔄') || text.toLowerCase().includes('troca')) return '🔄';
+        return '📝';
+    }
+
+    function getShiftRange(dateKey, hoursDuration) {
+        const y = Number(dateKey.slice(0, 4));
+        const m = Number(dateKey.slice(5, 7));
+        const d = Number(dateKey.slice(8, 10));
+        const startDateStr = '' + y + String(m).padStart(2, '0') + String(d).padStart(2, '0') + 'T080000';
+        if (hoursDuration === 12) {
+            return { startDateStr: startDateStr, endDateStr: '' + y + String(m).padStart(2, '0') + String(d).padStart(2, '0') + 'T200000' };
+        }
+        const nextDayObj = new Date(y, m - 1, d + 1);
+        const endDateStr = '' + nextDayObj.getFullYear() + String(nextDayObj.getMonth() + 1).padStart(2, '0') + String(nextDayObj.getDate()).padStart(2, '0') + 'T080000';
+        return { startDateStr: startDateStr, endDateStr: endDateStr };
+    }
 
     function parseLocalDate(dateStr) {
         const y = Number(dateStr.slice(0, 4));
@@ -392,6 +417,11 @@
         selectedIsBaseWork = isBaseWork;
         selectedHasPermuta = hasPermuta;
         selectedIsFinalWork = isFinalWork;
+		const currentDsro = dsroMap[dateKey] || 0;
+        document.getElementById('btnDsro12').classList.toggle('active', currentDsro === 12);
+        document.getElementById('btnDsro24').classList.toggle('active', currentDsro === 24);
+        document.getElementById('btnDsroClear').classList.toggle('active', !currentDsro);
+		
 
         document.getElementById('modalDateTitle').textContent = 'Data: ' + displayDate;
         document.getElementById('modalStatusDesc').textContent = 'Status atual: ' + (isFinalWork ? 'QAP (SERVIÇO 24H)' : 'FOLGA') + (hasPermuta ? ' • com permuta' : '');
@@ -422,6 +452,22 @@
         dayModal.classList.remove('open');
         render();
     };
+
+	function setDsroForSelected(hours) {
+        if (hours > 0) {
+            dsroMap[selectedDateKey] = hours;
+        } else {
+            delete dsroMap[selectedDateKey];
+        }
+        localStorage.setItem('escala_dsro', JSON.stringify(dsroMap));
+        dayModal.classList.remove('open');
+        render();
+    }
+
+    document.getElementById('btnDsro12').onclick = function() { setDsroForSelected(12); };
+    document.getElementById('btnDsro24').onclick = function() { setDsroForSelected(24); };
+    document.getElementById('btnDsroClear').onclick = function() { setDsroForSelected(0); };
+	
 
     document.getElementById('btnTogglePermuta').onclick = function() {
         if (selectedHasPermuta) {
@@ -505,11 +551,12 @@
 		};
 		document.getElementById('btnShareWhatsApp').onclick = function() {
 		const payload = {
-		b: baseDateInput.value,
-		p: permutas,
-		n: notes,
-		r: reinicios
-		};
+            b: baseDateInput.value,
+            p: permutas,
+            n: notes,
+            r: reinicios,
+            d: dsroMap
+        };
 		const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
 		const baseUrl = window.location.origin + window.location.pathname;
 		const shareUrl = baseUrl + '?dados=' + encoded;
@@ -530,6 +577,7 @@
 		calendarGrid.innerHTML = '';
 		currentMonthEvents = [];
 		let workCount = 0;
+		let totalDsroHours = 0;
 		let offCount = 0;
 		let baseWorkCount = 0;
 		for (let i = 0; i < firstDayOfWeek; i++) {
@@ -549,6 +597,10 @@
 		if (isBaseWork) baseWorkCount++;
 		const hasPermuta = permutas.hasOwnProperty(dateKey);
 		const hasNote = notes.hasOwnProperty(dateKey) && notes[dateKey].trim() !== '';
+		const noteText = notes[dateKey] || '';
+        const postoIcon = getPostoIcon(noteText);
+        const dsroHours = dsroMap[dateKey] || 0;
+        totalDsroHours += dsroHours;
 		const isFinalWork = hasPermuta ? permutas[dateKey] : isBaseWork;
 		if (isFinalWork) workCount++; else offCount++;
 		currentMonthEvents.push({
@@ -577,7 +629,20 @@
 		numSpan.className = 'day-num';
 		numSpan.textContent = d;
 		cell.appendChild(numSpan);
-		if (isToday) {
+			if (postoIcon) {
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'posto-icon';
+                iconSpan.textContent = postoIcon;
+                cell.appendChild(iconSpan);
+            }
+
+            if (dsroHours > 0) {
+                const dsroSpan = document.createElement('span');
+                dsroSpan.className = 'dsro-tag';
+                dsroSpan.textContent = 'DSRO ' + dsroHours + 'h';
+                cell.appendChild(dsroSpan);
+            }
+		else (isToday) {
 		const todaySpan = document.createElement('span');
 		todaySpan.className = 'today-tag';
 		todaySpan.textContent = 'HOJE';
@@ -592,7 +657,7 @@
 		})(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork);
 		calendarGrid.appendChild(cell);
 		}
-		document.getElementById('countWork').textContent = workCount;
+		document.getElementById('countDsroHours').textContent = totalDsroHours + 'h';
 		document.getElementById('countOff').textContent = offCount;
 		const balance = workCount - baseWorkCount;
 		document.getElementById('countBalance').textContent = balance > 0 ? '+' + balance : balance;
