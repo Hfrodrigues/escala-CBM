@@ -179,7 +179,7 @@
 <div class="container">
     <header>
         <div class="top-bar">
-            <h1>🚒 Escala Serviço • Sd Vivian </h1>
+            <h1>🚒 Escala Serviço • CBMCE</h1>
             <button class="theme-btn" id="themeToggle">🌙 Modo Tático</button>
         </div>
 
@@ -198,8 +198,8 @@
                 <input type="month" id="viewMonth">
             </div>
         </div>
-              <div class="summary">
-            <div class="stat"><span>Serviços 24h</span><strong id="countWork">0</strong></div>
+        <div class="summary">
+            <div class="stat"><span>Horas DSRO</span><strong id="countDsroHours">0h</strong></div>
             <div class="stat"><span>Folgas</span><strong id="countOff">0</strong></div>
             <div class="stat"><span>Saldo Trocas</span><strong id="countBalance">0</strong></div>
         </div>
@@ -218,8 +218,8 @@
         <div class="legend">
             <div class="legend-item"><div class="box" style="background:var(--work-bg); border:1px solid var(--work-border);"></div> QAP (Serviço)</div>
             <div class="legend-item"><div class="box" style="background:var(--off-bg); border:1px solid var(--off-border);"></div> Folga</div>
+            <div class="legend-item"><div class="box" style="background:var(--dsro-bg);"></div> DSRO</div>
             <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Permuta</div>
-            <div class="legend-item"><div class="dot-sample" style="background:var(--note-badge);"></div> Anotação</div>
             <div class="legend-item"><div class="box" style="border:2px solid var(--today-ring);"></div> Hoje</div>
         </div>
     </div>
@@ -231,7 +231,7 @@
         <p class="modal-sub" id="modalStatusDesc">Status atual: Folga</p>
         
         <div class="note-box">
-            <label for="dayNoteInput">Anotação / Posto do dia:</label>
+            <label for="dayNoteInput">Posto do dia / Anotação (o ícone aparece no calendário):</label>
             <div class="quick-tags">
                 <span class="tag-chip" data-text="🚒 Viatura / ABT">🚒 ABT</span>
                 <span class="tag-chip" data-text="🚑 Resgate / UR">🚑 Resgate</span>
@@ -239,11 +239,21 @@
                 <span class="tag-chip" data-text="🔄 Troca de Serviço">🔄 Troca</span>
             </div>
             <div class="note-row">
-                <input type="text" id="dayNoteInput" placeholder="Escreva um lembrete...">
+                <input type="text" id="dayNoteInput" placeholder="Ex: 🚒 ABT ou lembrete...">
                 <button class="btn-save-note" id="btnSaveNote">Salvar</button>
             </div>
         </div>
-  <div class="modal-actions">
+
+        <div class="dsro-box">
+            <label>⚡ DSRO (Serviço Extra neste dia):</label>
+            <div class="dsro-btns">
+                <button class="btn-dsro" id="btnDsro12">DSRO 12h</button>
+                <button class="btn-dsro" id="btnDsro24">DSRO 24h</button>
+                <button class="btn-dsro" id="btnDsroClear">Nenhum</button>
+            </div>
+        </div>
+
+        <div class="modal-actions">
             <button class="btn-action" id="btnTogglePermuta">
                 <span id="btnPermutaTitle">🔄 Fazer Permuta Pontual (2x6)</span>
                 <small id="btnPermutaDesc">Altera apenas este dia sem mudar o restante da escala.</small>
@@ -254,7 +264,7 @@
             </button>
             <button class="btn-action" id="btnSingleGCal">
                 <span>🗓️ Salvar este dia no Google Agenda</span>
-                <small>Plantão 24h: das 08:00 até as 08:00 do dia seguinte.</small>
+                <small>Exporta com horário de serviço ou DSRO configurado.</small>
             </button>
         </div>
         <button class="btn-cancel" id="btnCloseModal">Fechar</button>
