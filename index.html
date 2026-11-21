@@ -139,9 +139,13 @@
         .box { width: 11px; height: 11px; border-radius: 3px; }
         .dot-sample { width: 8px; height: 8px; border-radius: 50%; }
 
-        .modal-backdrop {
+        . {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
             justify-content: center; align-items: flex-end; z-index: 100; padding: 16px;
+        }
+		.modal-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            justify-content: center; align-items: flex-end; z-index: 100; padding: 12px;
         }
         .modal-backdrop.open { display: flex; }
         .modal-box {
@@ -172,6 +176,13 @@
         }
         .btn-action small { font-weight: 400; font-size: 0.74rem; color: var(--text-muted); }
         .btn-cancel { margin-top: 8px; padding: 10px; width: 100%; border: none; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; }
+		.dsro-tag { font-size: 0.48rem; background: var(--dsro-bg); color: #fff; padding: 1px 4px; border-radius: 4px; font-weight: 800; line-height: 1; }
+        .posto-icon { font-size: 0.78rem; line-height: 1; }
+        .dsro-box { margin-bottom: 12px; padding: 10px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border-subtle); }
+        .dsro-btns { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 6px; margin-top: 6px; }
+        .btn-dsro { padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--card); color: var(--text-main); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+        .btn-dsro.active { background: var(--dsro-bg); color: #fff; border-color: var(--dsro-bg); }
+		
     </style>
 </head>
 <body>
