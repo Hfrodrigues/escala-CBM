@@ -611,7 +611,6 @@
 		const message = `Prezado, segue minha escala do mês *${m}/${y} atualizada* (Plantão 24h • Entrada 08h):\n\n${shareUrl}`;
 		const whatsappUrl = 'https://whatsapp.com' + encodeURIComponent(message);
 		window.open(whatsappUrl, '_blank');
-		};
 		document.getElementById('btnCloseModal').onclick = function() { dayModal.classList.remove('open'); };
 		dayModal.onclick = function(e) { if (e.target === dayModal) dayModal.classList.remove('open'); };
 		function render() {
