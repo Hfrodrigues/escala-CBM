@@ -94,10 +94,11 @@
         .quote-hint { font-size: 0.65rem; opacity: 0.85; display: block; margin-top: 4px; text-align: right; }
 
         .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .controls-full { margin-top: 10px; }
         label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
-        input[type="date"], input[type="month"], input[type="text"] {
+        input[type="date"], input[type="month"], input[type="text"], select {
             width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 8px;
-            font-size: 0.9rem; background: var(--input-bg); color: var(--text-main);
+            font-size: 0.88rem; background: var(--input-bg); color: var(--text-main);
         }
 
         .summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; text-align: center; }
@@ -154,8 +155,8 @@
         .modal-backdrop.open { display: flex; }
         .modal-box {
             background: var(--card); color: var(--text-main); width: 100%; max-width: 440px;
-            border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border-top: 4px solid var(--fire-red);
+            border-radius: 16px; padding: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-top: 4px solid var(--fire-red); max-height: 90vh; overflow-y: auto;
         }
         .modal-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px 0; }
         .modal-sub { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 12px 0; }
@@ -168,17 +169,17 @@
         }
         .tag-chip:active { background: var(--fire-red); color: #fff; }
 
-        .note-box { margin-bottom: 14px; }
+        .note-box { margin-bottom: 12px; }
         .note-row { display: flex; gap: 6px; }
         .btn-save-note { padding: 0 14px; border-radius: 8px; border: none; background: var(--fire-red); color: #fff; font-weight: 600; cursor: pointer; }
         
         .modal-actions { display: flex; flex-direction: column; gap: 8px; }
         .btn-action {
-            width: 100%; padding: 11px; border-radius: 10px; border: 1px solid var(--border-subtle);
-            background: var(--bg); color: var(--text-main); font-size: 0.88rem; font-weight: 600;
+            width: 100%; padding: 10px 11px; border-radius: 10px; border: 1px solid var(--border-subtle);
+            background: var(--bg); color: var(--text-main); font-size: 0.86rem; font-weight: 600;
             text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
         }
-        .btn-action small { font-weight: 400; font-size: 0.74rem; color: var(--text-muted); }
+        .btn-action small { font-weight: 400; font-size: 0.73rem; color: var(--text-muted); }
         .btn-cancel { margin-top: 8px; padding: 10px; width: 100%; border: none; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; }
         
         .dsro-tag { font-size: 0.48rem; background: var(--dsro-bg); color: var(--dsro-text); padding: 1px 4px; border-radius: 4px; font-weight: 800; line-height: 1; }
@@ -205,7 +206,7 @@
 
         <div class="controls">
             <div>
-                <label for="baseDate">1º Serviço (24h):</label>
+                <label for="baseDate">1º Serviço:</label>
                 <input type="date" id="baseDate">
             </div>
             <div>
@@ -213,6 +214,15 @@
                 <input type="month" id="viewMonth">
             </div>
         </div>
+
+        <div class="controls-full">
+            <label for="patternSelect">Padrão de Ciclo Inicial:</label>
+            <select id="patternSelect">
+                <option value="1x3">1x3 (Padrão: 24h serviço × 72h folga)</option>
+                <option value="2x6">2x6 (Permuta Fixa: 48h serviço × 6 dias folga)</option>
+            </select>
+        </div>
+
         <div class="summary">
             <div class="stat"><span>Horas DSRO</span><strong id="countDsroHours">0h</strong></div>
             <div class="stat"><span>Folgas</span><strong id="countOff">0</strong></div>
@@ -234,7 +244,7 @@
             <div class="legend-item"><div class="box" style="background:var(--work-bg); border:1px solid var(--work-border);"></div> QAP (Serviço)</div>
             <div class="legend-item"><div class="box" style="background:var(--off-bg); border:1px solid var(--off-border);"></div> Folga</div>
             <div class="legend-item"><span style="color:#7c3aed; font-size:1rem; line-height:1;">★</span> DSRO</div>
-            <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Permuta</div>
+            <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Permuta / 2x6</div>
             <div class="legend-item"><div class="box" style="border:2px solid var(--today-ring);"></div> Hoje</div>
         </div>
     </div>
@@ -270,12 +280,16 @@
 
         <div class="modal-actions">
             <button class="btn-action" id="btnTogglePermuta">
-                <span id="btnPermutaTitle">🔄 Fazer Permuta Pontual (2x6)</span>
+                <span id="btnPermutaTitle">🔄 Fazer Permuta Pontual</span>
                 <small id="btnPermutaDesc">Altera apenas este dia sem mudar o restante da escala.</small>
             </button>
-            <button class="btn-action" id="btnRecalcFromHere">
-                <span>📅 Reiniciar Ciclo 1x3 a partir desta data</span>
-                <small>Altera apenas daqui para frente, mantendo o passado intacto.</small>
+            <button class="btn-action" id="btnRecalc1x3">
+                <span>📅 Iniciar ciclo 1x3 a partir desta data</span>
+                <small>Assume escala normal (24h × 72h) daqui para frente.</small>
+            </button>
+            <button class="btn-action" id="btnRecalc2x6">
+                <span>🔁 Iniciar ciclo 2x6 a partir desta data</span>
+                <small>Assume dobra fixa (48h serviço × 6 dias folga) daqui para frente.</small>
             </button>
             <button class="btn-action" id="btnSingleGCal">
                 <span>🗓️ Salvar este dia no Google Agenda</span>
@@ -302,6 +316,7 @@
 
     const baseDateInput = document.getElementById('baseDate');
     const viewMonthInput = document.getElementById('viewMonth');
+    const patternSelect = document.getElementById('patternSelect');
     const calendarGrid = document.getElementById('calendarGrid');
     const themeToggle = document.getElementById('themeToggle');
     const dayModal = document.getElementById('dayModal');
@@ -335,6 +350,7 @@
         try {
             const decoded = JSON.parse(decodeURIComponent(atob(sharedPayload)));
             if (decoded.b) localStorage.setItem('escala_baseDate', decoded.b);
+            if (decoded.m) localStorage.setItem('escala_basePattern', decoded.m);
             if (decoded.p) localStorage.setItem('escala_permutas', JSON.stringify(decoded.p));
             if (decoded.n) localStorage.setItem('escala_notes', JSON.stringify(decoded.n));
             if (decoded.r) localStorage.setItem('escala_reinicios', JSON.stringify(decoded.r));
@@ -349,11 +365,17 @@
     const todayKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
     let savedBase = localStorage.getItem('escala_baseDate') || todayKey;
+    let savedPattern = localStorage.getItem('escala_basePattern') || '1x3';
     let permutas = JSON.parse(localStorage.getItem('escala_permutas') || '{}');
     let notes = JSON.parse(localStorage.getItem('escala_notes') || '{}');
-    let reinicios = JSON.parse(localStorage.getItem('escala_reinicios') || '[]');
     let dsroMap = JSON.parse(localStorage.getItem('escala_dsro') || '{}');
     let isDark = localStorage.getItem('escala_dark') === 'true';
+
+    // Migração segura de reinícios antigos (string) para objetos { date, pattern }
+    let rawReinicios = JSON.parse(localStorage.getItem('escala_reinicios') || '[]');
+    let reinicios = rawReinicios.map(function(item) {
+        return typeof item === 'string' ? { date: item, pattern: '1x3' } : item;
+    });
 
     if (isDark) {
         document.body.classList.add('dark');
@@ -368,12 +390,14 @@
     };
 
     baseDateInput.value = savedBase;
+    patternSelect.value = savedPattern;
     viewMonthInput.value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
 
     let selectedDateKey = null;
     let selectedIsBaseWork = false;
     let selectedHasPermuta = false;
     let selectedIsFinalWork = false;
+    let selectedPattern = '1x3';
     let currentMonthEvents = [];
 
     function getPostoIcon(noteText) {
@@ -406,10 +430,10 @@
         return new Date(y, m - 1, d);
     }
 
-    function getEffectiveBaseDateStr(dateKey) {
-        let effective = baseDateInput.value;
+    function getEffectiveRule(dateKey) {
+        let effective = { date: baseDateInput.value, pattern: patternSelect.value };
         for (let i = 0; i < reinicios.length; i++) {
-            if (reinicios[i] <= dateKey) {
+            if (reinicios[i].date <= dateKey) {
                 effective = reinicios[i];
             } else {
                 break;
@@ -418,18 +442,25 @@
         return effective;
     }
 
-    function openDayOptions(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork) {
+    function openDayOptions(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork, activePattern) {
         selectedDateKey = dateKey;
         selectedIsBaseWork = isBaseWork;
         selectedHasPermuta = hasPermuta;
         selectedIsFinalWork = isFinalWork;
+        selectedPattern = activePattern;
+
         const currentDsro = dsroMap[dateKey] || 0;
         document.getElementById('btnDsro12').classList.toggle('active', currentDsro === 12);
         document.getElementById('btnDsro24').classList.toggle('active', currentDsro === 24);
         document.getElementById('btnDsroClear').classList.toggle('active', !currentDsro);
 
         document.getElementById('modalDateTitle').textContent = 'Data: ' + displayDate;
-        document.getElementById('modalStatusDesc').textContent = 'Status atual: ' + (isFinalWork ? 'QAP (SERVIÇO 24H)' : 'FOLGA') + (hasPermuta ? ' • com permuta' : '') + (currentDsro ? ' • DSRO ' + currentDsro + 'h' : '');
+        document.getElementById('modalStatusDesc').textContent =
+            'Status: ' + (isFinalWork ? 'QAP (SERVIÇO 24H)' : 'FOLGA') +
+            ' • Ciclo ' + activePattern +
+            (hasPermuta ? ' • ajuste pontual' : '') +
+            (currentDsro ? ' • DSRO ' + currentDsro + 'h' : '');
+
         dayNoteInput.value = notes[dateKey] || '';
 
         const btnPermutaTitle = document.getElementById('btnPermutaTitle');
@@ -437,10 +468,10 @@
 
         if (hasPermuta) {
             btnPermutaTitle.textContent = '↩️ Desfazer Permuta Pontual';
-            btnPermutaDesc.textContent = 'Volta este dia para a escala original 1x3.';
+            btnPermutaDesc.textContent = 'Volta este dia para o ciclo automático (' + activePattern + ').';
         } else {
             btnPermutaTitle.textContent = '🔄 Trocar apenas este dia para ' + (isBaseWork ? 'FOLGA' : 'QAP (SERVIÇO)');
-            btnPermutaDesc.textContent = 'Ideal para permuta 2x6 sem alterar o ciclo futuro.';
+            btnPermutaDesc.textContent = 'Altera pontualmente sem mudar o ciclo futuro.';
         }
 
         dayModal.classList.add('open');
@@ -484,15 +515,17 @@
         render();
     };
 
-    document.getElementById('btnRecalcFromHere').onclick = function() {
+    function applyCycleFromSelected(newPattern) {
         if (selectedDateKey <= baseDateInput.value) {
             baseDateInput.value = selectedDateKey;
+            patternSelect.value = newPattern;
             localStorage.setItem('escala_baseDate', selectedDateKey);
+            localStorage.setItem('escala_basePattern', newPattern);
             reinicios = [];
         } else {
-            reinicios = reinicios.filter(function(r) { return r < selectedDateKey; });
-            reinicios.push(selectedDateKey);
-            reinicios.sort();
+            reinicios = reinicios.filter(function(r) { return r.date < selectedDateKey; });
+            reinicios.push({ date: selectedDateKey, pattern: newPattern });
+            reinicios.sort(function(a, b) { return a.date.localeCompare(b.date); });
         }
         localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
 
@@ -503,7 +536,10 @@
 
         dayModal.classList.remove('open');
         render();
-    };
+    }
+
+    document.getElementById('btnRecalc1x3').onclick = function() { applyCycleFromSelected('1x3'); };
+    document.getElementById('btnRecalc2x6').onclick = function() { applyCycleFromSelected('2x6'); };
 
     document.getElementById('btnSingleGCal').onclick = function() {
         const dsroHours = dsroMap[selectedDateKey] || 0;
@@ -517,7 +553,7 @@
         
         const defaultDetail = dsroHours > 0 
             ? 'Serviço Extra (DSRO ' + dsroHours + 'h)' 
-            : (selectedHasPermuta ? 'Dia alterado por permuta (08:00 às 08:00)' : 'Plantão 24h: 08:00 às 08:00');
+            : (selectedHasPermuta || selectedPattern === '2x6' ? 'Permuta / Ciclo ' + selectedPattern + ' (08:00 às 08:00)' : 'Plantão 24h: 08:00 às 08:00');
             
         const details = notes[selectedDateKey] || defaultDetail;
         const gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(title) + '&dates=' + range.startDateStr + '/' + range.endDateStr + '&details=' + encodeURIComponent(details);
@@ -541,12 +577,12 @@
         activeEvents.forEach(function(ev) {
             if (ev.isFinalWork) {
                 const range = getShiftRange(ev.dateKey, 24);
-                const summary = ev.hasPermuta ? '🚒 Serviço 24h (Permuta)' : '🚒 Serviço 24h (QAP)';
+                const summary = (ev.hasPermuta || ev.activePattern === '2x6') ? '🚒 Serviço 24h (Permuta ' + ev.activePattern + ')' : '🚒 Serviço 24h (QAP)';
                 const desc = ev.note ? ev.note : 'Turno de 24h: 08:00 às 08:00 do dia seguinte';
 
                 icsLines.push(
                     'BEGIN:VEVENT',
-                    'UID:' + ev.dateKey + '-escala1x3@sdvivian',
+                    'UID:' + ev.dateKey + '-escala@sdvivian',
                     'DTSTAMP:' + range.startDateStr,
                     'DTSTART:' + range.startDateStr,
                     'DTEND:' + range.endDateStr,
@@ -656,12 +692,22 @@
         for (let d = 1; d <= daysInMonth; d++) {
             const dateKey = year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
             const displayDate = String(d).padStart(2, '0') + '/' + String(month).padStart(2, '0') + '/' + year;
-            const effectiveBase = parseLocalDate(getEffectiveBaseDateStr(dateKey));
+            
+            const rule = getEffectiveRule(dateKey);
+            const effectiveBase = parseLocalDate(rule.date);
             const utcCurrent = Date.UTC(year, month - 1, d);
             const utcBase = Date.UTC(effectiveBase.getFullYear(), effectiveBase.getMonth(), effectiveBase.getDate());
             const diffDays = Math.floor((utcCurrent - utcBase) / (1000 * 60 * 60 * 24));
-            const mod = ((diffDays % 4) + 4) % 4;
-            const isBaseWork = (mod === 0);
+
+            let isBaseWork = false;
+            if (rule.pattern === '2x6') {
+                const mod8 = ((diffDays % 8) + 8) % 8;
+                isBaseWork = (mod8 === 0 || mod8 === 1);
+            } else {
+                const mod4 = ((diffDays % 4) + 4) % 4;
+                isBaseWork = (mod4 === 0);
+            }
+
             if (isBaseWork) baseWorkCount++;
 
             const hasPermuta = permutas.hasOwnProperty(dateKey);
@@ -678,6 +724,7 @@
                 dateKey: dateKey,
                 isFinalWork: isFinalWork,
                 hasPermuta: hasPermuta,
+                activePattern: rule.pattern,
                 dsroHours: dsroHours,
                 note: notes[dateKey] || ''
             });
@@ -688,7 +735,8 @@
 
             const badgesDiv = document.createElement('div');
             badgesDiv.className = 'badges';
-            if (hasPermuta) {
+            // Acende ponto laranja se houve ajuste pontual OU se está em ciclo 2x6 permutado
+            if (hasPermuta || rule.pattern === '2x6') {
                 const dotP = document.createElement('div');
                 dotP.className = 'dot-permuta';
                 badgesDiv.appendChild(dotP);
@@ -729,9 +777,9 @@
             labelSpan.textContent = isFinalWork ? 'QAP' : 'Folga';
             cell.appendChild(labelSpan);
 
-            cell.onclick = (function(dk, dd, ibw, hp, ifw) {
-                return function() { openDayOptions(dk, dd, ibw, hp, ifw); };
-            })(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork);
+            cell.onclick = (function(dk, dd, ibw, hp, ifw, pat) {
+                return function() { openDayOptions(dk, dd, ibw, hp, ifw, pat); };
+            })(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork, rule.pattern);
 
             calendarGrid.appendChild(cell);
         }
@@ -744,6 +792,13 @@
 
     baseDateInput.addEventListener('change', function() {
         localStorage.setItem('escala_baseDate', baseDateInput.value);
+        reinicios = [];
+        localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
+        render();
+    });
+
+    patternSelect.addEventListener('change', function() {
+        localStorage.setItem('escala_basePattern', patternSelect.value);
         reinicios = [];
         localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
         render();
