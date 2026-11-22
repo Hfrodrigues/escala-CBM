@@ -2,13 +2,13 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Escala Serviço • CBMCE</title>
     <link rel="icon" type="image/png" href="icone.png">
     <link rel="apple-touch-icon" href="icone.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
     <style>
         :root {
             --bg: #f8fafc;
@@ -34,9 +34,6 @@
             --dsro-cell-bg: #7c3aed;
             --dsro-cell-text: #ffffff;
             --dsro-cell-border: #5b21b6;
-
-            --dsro-bg: #ede9fe;
-            --dsro-text: #7c3aed;
             
             --permuta-badge: #f59e0b;
             --note-badge: #2563eb;
@@ -65,9 +62,6 @@
             --dsro-cell-bg: #6d28d9;
             --dsro-cell-text: #ffffff;
             --dsro-cell-border: #a78bfa;
-
-            --dsro-bg: #4c1d95;
-            --dsro-text: #ddd6fe;
             
             --permuta-badge: #fbbf24;
             --note-badge: #60a5fa;
@@ -138,8 +132,6 @@
         .day-cell.empty { background: transparent; cursor: default; }
         .day-cell.work { background: var(--work-bg); color: var(--work-text); border-color: var(--work-border); }
         .day-cell.off { background: var(--off-bg); color: var(--off-text); border-color: var(--off-border); }
-        
-        /* Estilo exclusivo para dias com DSRO */
         .day-cell.dsro {
             background: var(--dsro-cell-bg);
             color: var(--dsro-cell-text);
@@ -179,200 +171,4 @@
         .modal-backdrop.open { display: flex; }
         .modal-box {
             background: var(--card); color: var(--text-main); width: 100%; max-width: 440px;
-            border-radius: 16px; padding: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border-top: 4px solid var(--fire-red); max-height: 90vh; overflow-y: auto;
-        }
-        .modal-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px 0; }
-        .modal-sub { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 12px 0; }
-        
-        .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-        .tag-chip {
-            font-size: 0.72rem; padding: 4px 8px; border-radius: 12px;
-            background: var(--bg); border: 1px solid var(--border-subtle);
-            color: var(--text-main); cursor: pointer; font-weight: 600;
-        }
-        .tag-chip:active { background: var(--fire-red); color: #fff; }
-
-        .note-box { margin-bottom: 12px; }
-        .note-row { display: flex; gap: 6px; }
-        .btn-save-note { padding: 0 14px; border-radius: 8px; border: none; background: var(--fire-red); color: #fff; font-weight: 600; cursor: pointer; }
-        
-        .modal-actions { display: flex; flex-direction: column; gap: 8px; }
-        .btn-action {
-            width: 100%; padding: 10px 11px; border-radius: 10px; border: 1px solid var(--border-subtle);
-            background: var(--bg); color: var(--text-main); font-size: 0.86rem; font-weight: 600;
-            text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
-        }
-        .btn-action small { font-weight: 400; font-size: 0.73rem; color: var(--text-muted); }
-        .btn-cancel { margin-top: 8px; padding: 10px; width: 100%; border: none; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; }
-        
-        .posto-icon { font-size: 0.78rem; line-height: 1; }
-        .dsro-box { margin-bottom: 12px; padding: 10px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border-subtle); }
-        .dsro-btns { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 6px; margin-top: 6px; }
-        .btn-dsro { padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--card); color: var(--text-main); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-        .btn-dsro.active { background: var(--dsro-cell-bg); color: #ffffff; border-color: var(--dsro-cell-border); }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <div class="top-bar">
-            <h1>🚒 Escala Serviço • CBMCE</h1>
-            <button class="theme-btn" id="themeToggle">🌙 Modo Tático</button>
-        </div>
-
-        <div class="quote-banner" id="quoteBanner" title="Toque para ver outra frase">
-            <span class="quote-text" id="quoteText">"Vida alheia e riquezas salvar!"</span>
-            <span class="quote-hint">🔥 Toque para nova frase</span>
-        </div>
-
-        <div class="controls">
-            <div>
-                <label for="baseDate">1º Serviço:</label>
-                <input type="date" id="baseDate">
-            </div>
-            <div>
-                <label for="viewMonth">Mês:</label>
-                <input type="month" id="viewMonth">
-            </div>
-        </div>
-
-        <div class="controls-full">
-            <label for="patternSelect">Padrão de Ciclo Inicial:</label>
-            <select id="patternSelect">
-                <option value="1x3">1x3 (Padrão: 24h serviço × 72h folga)</option>
-                <option value="2x6">2x6 (Permuta Fixa: 48h serviço × 6 dias folga)</option>
-            </select>
-        </div>
-
-        <div class="summary">
-            <div class="stat"><span>Horas DSRO</span><strong id="countDsroHours">0h</strong></div>
-            <div class="stat"><span>Folgas</span><strong id="countOff">0</strong></div>
-            <div class="stat"><span>Total Horas</span><strong id="countTotalHours">0h</strong></div>
-        </div>
-        <div class="action-bar">
-            <button class="btn-share btn-whatsapp" id="btnShareWhatsApp">📲 WhatsApp</button>
-            <button class="btn-share btn-gcal" id="btnExportICS">📅 Google Agenda</button>
-        </div>
-    </header>
-
-    <div class="calendar-card" id="captureArea">
-        <div class="weekdays">
-            <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
-        </div>
-        <div class="calendar-grid" id="calendarGrid"></div>
-        
-        <div class="legend">
-            <div class="legend-item"><div class="box" style="background:var(--work-bg); border:1px solid var(--work-border);"></div> QAP (Serviço)</div>
-            <div class="legend-item"><div class="box" style="background:var(--off-bg); border:1px solid var(--off-border);"></div> Folga</div>
-            <div class="legend-item"><div class="box" style="background:var(--dsro-cell-bg); border:1px solid var(--dsro-cell-border);"></div> DSRO</div>
-            <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Ajuste</div>
-            <div class="legend-item"><div class="box" style="border:2px solid var(--today-ring);"></div> Hoje</div>
-        </div>
-    </div>
-</div>
-
-<div class="modal-backdrop" id="dayModal">
-    <div class="modal-box">
-        <h3 class="modal-title" id="modalDateTitle">Dia 00/00</h3>
-        <p class="modal-sub" id="modalStatusDesc">Status atual: Folga</p>
-        
-        <div class="note-box">
-            <label for="dayNoteInput">Posto do dia / Anotação (o ícone aparece no calendário):</label>
-            <div class="quick-tags">
-                <span class="tag-chip" data-text="🚒 Viatura / ABT">🚒 ABT</span>
-                <span class="tag-chip" data-text="🚑 Resgate / UR">🚑 Resgate</span>
-                <span class="tag-chip" data-text="🏢 Guarda / Quartel">🏢 Guarda</span>
-                <span class="tag-chip" data-text="🔄 Troca de Serviço">🔄 Troca</span>
-            </div>
-            <div class="note-row">
-                <input type="text" id="dayNoteInput" placeholder="Ex: 🚒 ABT ou lembrete...">
-                <button class="btn-save-note" id="btnSaveNote">Salvar</button>
-            </div>
-        </div>
-
-        <div class="dsro-box">
-            <label>⚡ DSRO (Serviço Extra neste dia):</label>
-            <div class="dsro-btns">
-                <button class="btn-dsro" id="btnDsro12">DSRO 12h</button>
-                <button class="btn-dsro" id="btnDsro24">DSRO 24h</button>
-                <button class="btn-dsro" id="btnDsroClear">Nenhum</button>
-            </div>
-        </div>
-
-        <div class="modal-actions">
-            <button class="btn-action" id="btnTogglePermuta">
-                <span id="btnPermutaTitle">🔄 Fazer Permuta Pontual</span>
-                <small id="btnPermutaDesc">Altera apenas este dia sem mudar o restante da escala.</small>
-            </button>
-            <button class="btn-action" id="btnRecalc1x3">
-                <span>📅 Iniciar ciclo 1x3 a partir desta data</span>
-                <small>Assume escala normal (24h × 72h) daqui para frente.</small>
-            </button>
-            <button class="btn-action" id="btnRecalc2x6">
-                <span>🔁 Iniciar ciclo 2x6 a partir desta data</span>
-                <small>Assume dobra fixa (48h serviço × 6 dias folga) daqui para frente.</small>
-            </button>
-            <button class="btn-action" id="btnSingleGCal">
-                <span>🗓️ Salvar este dia no Google Agenda</span>
-                <small>Exporta com horário de serviço ou DSRO configurado.</small>
-            </button>
-        </div>
-        <button class="btn-cancel" id="btnCloseModal">Fechar</button>
-    </div>
-</div>
-
-<script>
-   const frasesMotivacionais = [
-        "🔥 Vida alheia e riquezas salvar! Tenha um excelente serviço.",
-        "🚒 Além de não ser fácil, ainda é difícil!",
-        "❤️ Tenho muito orgulho da mulher e da bombeira incrível que você é!",
-        "🛡️ Que seu plantão seja tranquilo, seguro e abençoado. Bom serviço!",
-        "⭐ Onde muitos recuam, você avança para salvar. Força e honra!",
-        "🏡 Quando a vida te derrubar, aproveite a chance e tire uma soneca.",
-        "🔥 Ser bombeira não é apenas uma profissão, é carregar o dom de salvar vidas.",
-        "💪 Vamos nos desesperar com calma",
-        "🚒 Entre o fogo e o perigo, brilha a sua coragem. Bom plantão, meu amor!",
-        "🌟 A vida é uma montanha-russa... Pena que você esqueceu o cinto."
-    ];
-
-    const baseDateInput = document.getElementById('baseDate');
-    const viewMonthInput = document.getElementById('viewMonth');
-    const patternSelect = document.getElementById('patternSelect');
-    const calendarGrid = document.getElementById('calendarGrid');
-    const themeToggle = document.getElementById('themeToggle');
-    const dayModal = document.getElementById('dayModal');
-    const dayNoteInput = document.getElementById('dayNoteInput');
-
-    function sortearFrase() {
-        const quoteText = document.getElementById('quoteText');
-        const atual = quoteText.textContent;
-        let nova = atual;
-        while (nova === atual && frasesMotivacionais.length > 1) {
-            const idx = Math.floor(Math.random() * frasesMotivacionais.length);
-            nova = '"' + frasesMotivacionais[idx] + '"';
-        }
-        quoteText.textContent = nova;
-    }
-
-    document.getElementById('quoteBanner').onclick = sortearFrase;
-    sortearFrase();
-
-    document.querySelectorAll('.tag-chip').forEach(function(chip) {
-        chip.onclick = function() {
-            const val = chip.getAttribute('data-text');
-            dayNoteInput.value = dayNoteInput.value ? dayNoteInput.value + ' • ' + val : val;
-        };
-    });
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedPayload = urlParams.get('dados');
-
-    if (sharedPayload) {
-        try {
-            const decoded = JSON.parse(decodeURIComponent(atob(sharedPayload)));
-            if (decoded.b) localStorage.setItem('escala_baseDate', decoded.b);
-            if (decoded.m) localStorage.setItem('escala_basePattern', decoded.m);
-            if (decoded.p) localStorage.setItem('escala_permutas', JSON.stringify(decoded.p));
-            if (decoded.n) localStorage.setItem('escala_notes', JSON.stringify(decoded.
+            border-radius: 16px; padding: 18px
