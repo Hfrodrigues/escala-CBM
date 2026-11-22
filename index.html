@@ -31,6 +31,10 @@
             --off-text: #065f46;
             --off-border: #34d399;
 
+            --dsro-cell-bg: #7c3aed;
+            --dsro-cell-text: #ffffff;
+            --dsro-cell-border: #5b21b6;
+
             --dsro-bg: #ede9fe;
             --dsro-text: #7c3aed;
             
@@ -57,6 +61,10 @@
             --off-bg: #064e3b;
             --off-text: #d1fae5;
             --off-border: #10b981;
+
+            --dsro-cell-bg: #6d28d9;
+            --dsro-cell-text: #ffffff;
+            --dsro-cell-border: #a78bfa;
 
             --dsro-bg: #4c1d95;
             --dsro-text: #ddd6fe;
@@ -130,6 +138,13 @@
         .day-cell.empty { background: transparent; cursor: default; }
         .day-cell.work { background: var(--work-bg); color: var(--work-text); border-color: var(--work-border); }
         .day-cell.off { background: var(--off-bg); color: var(--off-text); border-color: var(--off-border); }
+        
+        /* Estilo exclusivo para dias com DSRO */
+        .day-cell.dsro {
+            background: var(--dsro-cell-bg);
+            color: var(--dsro-cell-text);
+            border-color: var(--dsro-cell-border);
+        }
         .day-cell.today { box-shadow: 0 0 0 2.5px var(--today-ring); font-weight: 800; }
         
         .today-tag {
@@ -139,9 +154,18 @@
         .day-num { font-size: 0.92rem; font-weight: 700; }
         .day-label { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
         
+        .dsro-center-hours {
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+            line-height: 1;
+        }
+
         .badges { position: absolute; top: 3px; right: 3px; display: flex; gap: 2px; }
         .dot-permuta { width: 6px; height: 6px; background: var(--permuta-badge); border-radius: 50%; }
         .dot-note { width: 6px; height: 6px; background: var(--note-badge); border-radius: 50%; }
+        .day-cell.dsro .dot-note { background: #ffffff; }
 
         .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 12px; font-size: 0.72rem; color: var(--text-muted); }
         .legend-item { display: flex; align-items: center; gap: 4px; }
@@ -182,12 +206,11 @@
         .btn-action small { font-weight: 400; font-size: 0.73rem; color: var(--text-muted); }
         .btn-cancel { margin-top: 8px; padding: 10px; width: 100%; border: none; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; }
         
-        .dsro-tag { font-size: 0.48rem; background: var(--dsro-bg); color: var(--dsro-text); padding: 1px 4px; border-radius: 4px; font-weight: 800; line-height: 1; }
         .posto-icon { font-size: 0.78rem; line-height: 1; }
         .dsro-box { margin-bottom: 12px; padding: 10px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border-subtle); }
         .dsro-btns { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 6px; margin-top: 6px; }
         .btn-dsro { padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--card); color: var(--text-main); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-        .btn-dsro.active { background: var(--dsro-bg); color: var(--dsro-text); border-color: var(--dsro-text); }
+        .btn-dsro.active { background: var(--dsro-cell-bg); color: #ffffff; border-color: var(--dsro-cell-border); }
     </style>
 </head>
 <body>
@@ -226,7 +249,7 @@
         <div class="summary">
             <div class="stat"><span>Horas DSRO</span><strong id="countDsroHours">0h</strong></div>
             <div class="stat"><span>Folgas</span><strong id="countOff">0</strong></div>
-            <div class="stat"><span>Saldo Trocas</span><strong id="countBalance">0</strong></div>
+            <div class="stat"><span>Total Horas</span><strong id="countTotalHours">0h</strong></div>
         </div>
         <div class="action-bar">
             <button class="btn-share btn-whatsapp" id="btnShareWhatsApp">📲 WhatsApp</button>
@@ -243,8 +266,8 @@
         <div class="legend">
             <div class="legend-item"><div class="box" style="background:var(--work-bg); border:1px solid var(--work-border);"></div> QAP (Serviço)</div>
             <div class="legend-item"><div class="box" style="background:var(--off-bg); border:1px solid var(--off-border);"></div> Folga</div>
-            <div class="legend-item"><span style="color:#7c3aed; font-size:1rem; line-height:1;">★</span> DSRO</div>
-            <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Permuta / 2x6</div>
+            <div class="legend-item"><div class="box" style="background:var(--dsro-cell-bg); border:1px solid var(--dsro-cell-border);"></div> DSRO</div>
+            <div class="legend-item"><div class="dot-sample" style="background:var(--permuta-badge);"></div> Ajuste</div>
             <div class="legend-item"><div class="box" style="border:2px solid var(--today-ring);"></div> Hoje</div>
         </div>
     </div>
@@ -352,460 +375,4 @@
             if (decoded.b) localStorage.setItem('escala_baseDate', decoded.b);
             if (decoded.m) localStorage.setItem('escala_basePattern', decoded.m);
             if (decoded.p) localStorage.setItem('escala_permutas', JSON.stringify(decoded.p));
-            if (decoded.n) localStorage.setItem('escala_notes', JSON.stringify(decoded.n));
-            if (decoded.r) localStorage.setItem('escala_reinicios', JSON.stringify(decoded.r));
-            if (decoded.d) localStorage.setItem('escala_dsro', JSON.stringify(decoded.d));
-            window.history.replaceState({}, document.title, window.location.pathname);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    const today = new Date();
-    const todayKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-
-    let savedBase = localStorage.getItem('escala_baseDate') || todayKey;
-    let savedPattern = localStorage.getItem('escala_basePattern') || '1x3';
-    let permutas = JSON.parse(localStorage.getItem('escala_permutas') || '{}');
-    let notes = JSON.parse(localStorage.getItem('escala_notes') || '{}');
-    let dsroMap = JSON.parse(localStorage.getItem('escala_dsro') || '{}');
-    let isDark = localStorage.getItem('escala_dark') === 'true';
-
-    // Migração segura de reinícios antigos (string) para objetos { date, pattern }
-    let rawReinicios = JSON.parse(localStorage.getItem('escala_reinicios') || '[]');
-    let reinicios = rawReinicios.map(function(item) {
-        return typeof item === 'string' ? { date: item, pattern: '1x3' } : item;
-    });
-
-    if (isDark) {
-        document.body.classList.add('dark');
-        themeToggle.textContent = '☀️ Modo Claro';
-    }
-
-    themeToggle.onclick = function() {
-        isDark = !isDark;
-        document.body.classList.toggle('dark', isDark);
-        themeToggle.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Tático';
-        localStorage.setItem('escala_dark', isDark);
-    };
-
-    baseDateInput.value = savedBase;
-    patternSelect.value = savedPattern;
-    viewMonthInput.value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-
-    let selectedDateKey = null;
-    let selectedIsBaseWork = false;
-    let selectedHasPermuta = false;
-    let selectedIsFinalWork = false;
-    let selectedPattern = '1x3';
-    let currentMonthEvents = [];
-
-    function getPostoIcon(noteText) {
-        if (!noteText) return '';
-        const text = noteText.trim();
-        if (text.includes('🚒') || text.toLowerCase().includes('abt')) return '🚒';
-        if (text.includes('🚑') || text.toLowerCase().includes('resgate') || text.toLowerCase().includes('ur')) return '🚑';
-        if (text.includes('🏢') || text.toLowerCase().includes('guarda')) return '🏢';
-        if (text.includes('🔄') || text.toLowerCase().includes('troca')) return '🔄';
-        return '📝';
-    }
-
-    function getShiftRange(dateKey, hoursDuration) {
-        const y = Number(dateKey.slice(0, 4));
-        const m = Number(dateKey.slice(5, 7));
-        const d = Number(dateKey.slice(8, 10));
-        const startDateStr = '' + y + String(m).padStart(2, '0') + String(d).padStart(2, '0') + 'T080000';
-        if (hoursDuration === 12) {
-            return { startDateStr: startDateStr, endDateStr: '' + y + String(m).padStart(2, '0') + String(d).padStart(2, '0') + 'T200000' };
-        }
-        const nextDayObj = new Date(y, m - 1, d + 1);
-        const endDateStr = '' + nextDayObj.getFullYear() + String(nextDayObj.getMonth() + 1).padStart(2, '0') + String(nextDayObj.getDate()).padStart(2, '0') + 'T080000';
-        return { startDateStr: startDateStr, endDateStr: endDateStr };
-    }
-
-    function parseLocalDate(dateStr) {
-        const y = Number(dateStr.slice(0, 4));
-        const m = Number(dateStr.slice(5, 7));
-        const d = Number(dateStr.slice(8, 10));
-        return new Date(y, m - 1, d);
-    }
-
-    function getEffectiveRule(dateKey) {
-        let effective = { date: baseDateInput.value, pattern: patternSelect.value };
-        for (let i = 0; i < reinicios.length; i++) {
-            if (reinicios[i].date <= dateKey) {
-                effective = reinicios[i];
-            } else {
-                break;
-            }
-        }
-        return effective;
-    }
-
-    function openDayOptions(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork, activePattern) {
-        selectedDateKey = dateKey;
-        selectedIsBaseWork = isBaseWork;
-        selectedHasPermuta = hasPermuta;
-        selectedIsFinalWork = isFinalWork;
-        selectedPattern = activePattern;
-
-        const currentDsro = dsroMap[dateKey] || 0;
-        document.getElementById('btnDsro12').classList.toggle('active', currentDsro === 12);
-        document.getElementById('btnDsro24').classList.toggle('active', currentDsro === 24);
-        document.getElementById('btnDsroClear').classList.toggle('active', !currentDsro);
-
-        document.getElementById('modalDateTitle').textContent = 'Data: ' + displayDate;
-        document.getElementById('modalStatusDesc').textContent =
-            'Status: ' + (isFinalWork ? 'QAP (SERVIÇO 24H)' : 'FOLGA') +
-            ' • Ciclo ' + activePattern +
-            (hasPermuta ? ' • ajuste pontual' : '') +
-            (currentDsro ? ' • DSRO ' + currentDsro + 'h' : '');
-
-        dayNoteInput.value = notes[dateKey] || '';
-
-        const btnPermutaTitle = document.getElementById('btnPermutaTitle');
-        const btnPermutaDesc = document.getElementById('btnPermutaDesc');
-
-        if (hasPermuta) {
-            btnPermutaTitle.textContent = '↩️ Desfazer Permuta Pontual';
-            btnPermutaDesc.textContent = 'Volta este dia para o ciclo automático (' + activePattern + ').';
-        } else {
-            btnPermutaTitle.textContent = '🔄 Trocar apenas este dia para ' + (isBaseWork ? 'FOLGA' : 'QAP (SERVIÇO)');
-            btnPermutaDesc.textContent = 'Altera pontualmente sem mudar o ciclo futuro.';
-        }
-
-        dayModal.classList.add('open');
-    }
-
-    document.getElementById('btnSaveNote').onclick = function() {
-        const text = dayNoteInput.value.trim();
-        if (text) {
-            notes[selectedDateKey] = text;
-        } else {
-            delete notes[selectedDateKey];
-        }
-        localStorage.setItem('escala_notes', JSON.stringify(notes));
-        dayModal.classList.remove('open');
-        render();
-    };
-
-    function setDsroForSelected(hours) {
-        if (hours > 0) {
-            dsroMap[selectedDateKey] = hours;
-        } else {
-            delete dsroMap[selectedDateKey];
-        }
-        localStorage.setItem('escala_dsro', JSON.stringify(dsroMap));
-        dayModal.classList.remove('open');
-        render();
-    }
-
-    document.getElementById('btnDsro12').onclick = function() { setDsroForSelected(12); };
-    document.getElementById('btnDsro24').onclick = function() { setDsroForSelected(24); };
-    document.getElementById('btnDsroClear').onclick = function() { setDsroForSelected(0); };
-
-    document.getElementById('btnTogglePermuta').onclick = function() {
-        if (selectedHasPermuta) {
-            delete permutas[selectedDateKey];
-        } else {
-            permutas[selectedDateKey] = !selectedIsBaseWork;
-        }
-        localStorage.setItem('escala_permutas', JSON.stringify(permutas));
-        dayModal.classList.remove('open');
-        render();
-    };
-
-    function applyCycleFromSelected(newPattern) {
-        if (selectedDateKey <= baseDateInput.value) {
-            baseDateInput.value = selectedDateKey;
-            patternSelect.value = newPattern;
-            localStorage.setItem('escala_baseDate', selectedDateKey);
-            localStorage.setItem('escala_basePattern', newPattern);
-            reinicios = [];
-        } else {
-            reinicios = reinicios.filter(function(r) { return r.date < selectedDateKey; });
-            reinicios.push({ date: selectedDateKey, pattern: newPattern });
-            reinicios.sort(function(a, b) { return a.date.localeCompare(b.date); });
-        }
-        localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
-
-        Object.keys(permutas).forEach(function(k) {
-            if (k >= selectedDateKey) delete permutas[k];
-        });
-        localStorage.setItem('escala_permutas', JSON.stringify(permutas));
-
-        dayModal.classList.remove('open');
-        render();
-    }
-
-    document.getElementById('btnRecalc1x3').onclick = function() { applyCycleFromSelected('1x3'); };
-    document.getElementById('btnRecalc2x6').onclick = function() { applyCycleFromSelected('2x6'); };
-
-    document.getElementById('btnSingleGCal').onclick = function() {
-        const dsroHours = dsroMap[selectedDateKey] || 0;
-        const duration = dsroHours > 0 ? dsroHours : 24;
-        const range = getShiftRange(selectedDateKey, duration);
-        
-        let title = selectedIsFinalWork ? '🚒 Serviço 24h • Sd Vivian' : '🏡 Folga • Sd Vivian';
-        if (dsroHours > 0) {
-            title = '⚡ DSRO ' + dsroHours + 'h • Sd Vivian';
-        }
-        
-        const defaultDetail = dsroHours > 0 
-            ? 'Serviço Extra (DSRO ' + dsroHours + 'h)' 
-            : (selectedHasPermuta || selectedPattern === '2x6' ? 'Permuta / Ciclo ' + selectedPattern + ' (08:00 às 08:00)' : 'Plantão 24h: 08:00 às 08:00');
-            
-        const details = notes[selectedDateKey] || defaultDetail;
-        const gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(title) + '&dates=' + range.startDateStr + '/' + range.endDateStr + '&details=' + encodeURIComponent(details);
-        window.open(gcalUrl, '_blank');
-    };
-
-    document.getElementById('btnExportICS').onclick = function() {
-        const activeEvents = currentMonthEvents.filter(function(e) { return e.isFinalWork || e.dsroHours > 0; });
-        if (activeEvents.length === 0) {
-            alert('Não há dias de serviço ou DSRO neste mês para exportar.');
-            return;
-        }
-
-        let icsLines = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'PRODID:-//Escala Sd Vivian//PT-BR',
-            'CALSCALE:GREGORIAN'
-        ];
-
-        activeEvents.forEach(function(ev) {
-            if (ev.isFinalWork) {
-                const range = getShiftRange(ev.dateKey, 24);
-                const summary = (ev.hasPermuta || ev.activePattern === '2x6') ? '🚒 Serviço 24h (Permuta ' + ev.activePattern + ')' : '🚒 Serviço 24h (QAP)';
-                const desc = ev.note ? ev.note : 'Turno de 24h: 08:00 às 08:00 do dia seguinte';
-
-                icsLines.push(
-                    'BEGIN:VEVENT',
-                    'UID:' + ev.dateKey + '-escala@sdvivian',
-                    'DTSTAMP:' + range.startDateStr,
-                    'DTSTART:' + range.startDateStr,
-                    'DTEND:' + range.endDateStr,
-                    'SUMMARY:' + summary,
-                    'DESCRIPTION:' + desc,
-                    'END:VEVENT'
-                );
-            }
-            if (ev.dsroHours > 0) {
-                const rangeDsro = getShiftRange(ev.dateKey, ev.dsroHours);
-                const summaryDsro = '⚡ DSRO ' + ev.dsroHours + 'h (Serviço Extra)';
-                const descDsro = ev.note ? ev.note : 'Serviço Extra DSRO de ' + ev.dsroHours + 'h';
-
-                icsLines.push(
-                    'BEGIN:VEVENT',
-                    'UID:' + ev.dateKey + '-dsro@sdvivian',
-                    'DTSTAMP:' + rangeDsro.startDateStr,
-                    'DTSTART:' + rangeDsro.startDateStr,
-                    'DTEND:' + rangeDsro.endDateStr,
-                    'SUMMARY:' + summaryDsro,
-                    'DESCRIPTION:' + descDsro,
-                    'END:VEVENT'
-                );
-            }
-        });
-
-        icsLines.push('END:VCALENDAR');
-        const blob = new Blob([icsLines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'escala-sd-vivian-' + viewMonthInput.value + '.ics';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-    document.getElementById('btnShareWhatsApp').onclick = function() {
-        const btn = document.getElementById('btnShareWhatsApp');
-        const originalText = btn.textContent;
-        btn.textContent = '⏳ Gerando print...';
-        btn.disabled = true;
-
-        const captureEl = document.getElementById('captureArea');
-        const y = viewMonthInput.value.slice(0, 4);
-        const m = viewMonthInput.value.slice(5, 7);
-        const bgColor = isDark ? '#1f2937' : '#ffffff';
-
-        html2canvas(captureEl, {
-            backgroundColor: bgColor,
-            scale: 2,
-            useCORS: true
-        }).then(function(canvas) {
-            canvas.toBlob(function(blob) {
-                btn.textContent = originalText;
-                btn.disabled = false;
-
-                const fileName = 'escala-cbmce-' + m + '-' + y + '.png';
-                const file = new File([blob], fileName, { type: 'image/png' });
-
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({
-                        files: [file],
-                        title: 'Escala CBMCE ' + m + '/' + y,
-                        text: 'Prezado, segue minha escala do mês *' + m + '/' + y + ' atualizada* (Plantão 24h • Entrada 08h).'
-                    }).catch(function(err) {
-                        console.log('Compartilhamento cancelado:', err);
-                    });
-                } else {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = fileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    alert('Print salvo! Agora é só anexar a imagem baixada no WhatsApp.');
-                }
-            }, 'image/png');
-        }).catch(function(err) {
-            btn.textContent = originalText;
-            btn.disabled = false;
-            alert('Erro ao gerar print: ' + err);
-        });
-    };
-
-    document.getElementById('btnCloseModal').onclick = function() { dayModal.classList.remove('open'); };
-    dayModal.onclick = function(e) { if (e.target === dayModal) dayModal.classList.remove('open'); };
-
-    function render() {
-        if (!baseDateInput.value || !viewMonthInput.value) return;
-        const year = Number(viewMonthInput.value.slice(0, 4));
-        const month = Number(viewMonthInput.value.slice(5, 7));
-        const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
-        const daysInMonth = new Date(year, month, 0).getDate();
-        calendarGrid.innerHTML = '';
-        currentMonthEvents = [];
-        let workCount = 0;
-        let totalDsroHours = 0;
-        let offCount = 0;
-        let baseWorkCount = 0;
-
-        for (let i = 0; i < firstDayOfWeek; i++) {
-            const emptyCell = document.createElement('div');
-            emptyCell.className = 'day-cell empty';
-            calendarGrid.appendChild(emptyCell);
-        }
-
-        for (let d = 1; d <= daysInMonth; d++) {
-            const dateKey = year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-            const displayDate = String(d).padStart(2, '0') + '/' + String(month).padStart(2, '0') + '/' + year;
-            
-            const rule = getEffectiveRule(dateKey);
-            const effectiveBase = parseLocalDate(rule.date);
-            const utcCurrent = Date.UTC(year, month - 1, d);
-            const utcBase = Date.UTC(effectiveBase.getFullYear(), effectiveBase.getMonth(), effectiveBase.getDate());
-            const diffDays = Math.floor((utcCurrent - utcBase) / (1000 * 60 * 60 * 24));
-
-            let isBaseWork = false;
-            if (rule.pattern === '2x6') {
-                const mod8 = ((diffDays % 8) + 8) % 8;
-                isBaseWork = (mod8 === 0 || mod8 === 1);
-            } else {
-                const mod4 = ((diffDays % 4) + 4) % 4;
-                isBaseWork = (mod4 === 0);
-            }
-
-            if (isBaseWork) baseWorkCount++;
-
-            const hasPermuta = permutas.hasOwnProperty(dateKey);
-            const hasNote = notes.hasOwnProperty(dateKey) && notes[dateKey].trim() !== '';
-            const noteText = notes[dateKey] || '';
-            const postoIcon = getPostoIcon(noteText);
-            const dsroHours = dsroMap[dateKey] || 0;
-            totalDsroHours += dsroHours;
-
-            const isFinalWork = hasPermuta ? permutas[dateKey] : isBaseWork;
-            if (isFinalWork) workCount++; else offCount++;
-
-            currentMonthEvents.push({
-                dateKey: dateKey,
-                isFinalWork: isFinalWork,
-                hasPermuta: hasPermuta,
-                activePattern: rule.pattern,
-                dsroHours: dsroHours,
-                note: notes[dateKey] || ''
-            });
-
-            const cell = document.createElement('div');
-            const isToday = (dateKey === todayKey);
-            cell.className = 'day-cell ' + (isFinalWork ? 'work' : 'off') + (isToday ? ' today' : '');
-
-            const badgesDiv = document.createElement('div');
-            badgesDiv.className = 'badges';
-            // Acende ponto laranja se houve ajuste pontual OU se está em ciclo 2x6 permutado
-            if (hasPermuta || rule.pattern === '2x6') {
-                const dotP = document.createElement('div');
-                dotP.className = 'dot-permuta';
-                badgesDiv.appendChild(dotP);
-            }
-            if (hasNote) {
-                const dotN = document.createElement('div');
-                dotN.className = 'dot-note';
-                badgesDiv.appendChild(dotN);
-            }
-            cell.appendChild(badgesDiv);
-
-            const numSpan = document.createElement('span');
-            numSpan.className = 'day-num';
-            numSpan.textContent = d;
-            cell.appendChild(numSpan);
-
-            if (postoIcon) {
-                const iconSpan = document.createElement('span');
-                iconSpan.className = 'posto-icon';
-                iconSpan.textContent = postoIcon;
-                cell.appendChild(iconSpan);
-            }
-
-            if (dsroHours > 0) {
-                const dsroSpan = document.createElement('span');
-                dsroSpan.className = 'dsro-tag';
-                dsroSpan.textContent = '★' + dsroHours + 'h';
-                cell.appendChild(dsroSpan);
-            } else if (isToday) {
-                const todaySpan = document.createElement('span');
-                todaySpan.className = 'today-tag';
-                todaySpan.textContent = 'HOJE';
-                cell.appendChild(todaySpan);
-            }
-
-            const labelSpan = document.createElement('span');
-            labelSpan.className = 'day-label';
-            labelSpan.textContent = isFinalWork ? 'QAP' : 'Folga';
-            cell.appendChild(labelSpan);
-
-            cell.onclick = (function(dk, dd, ibw, hp, ifw, pat) {
-                return function() { openDayOptions(dk, dd, ibw, hp, ifw, pat); };
-            })(dateKey, displayDate, isBaseWork, hasPermuta, isFinalWork, rule.pattern);
-
-            calendarGrid.appendChild(cell);
-        }
-
-        document.getElementById('countDsroHours').textContent = totalDsroHours + 'h';
-        document.getElementById('countOff').textContent = offCount;
-        const balance = workCount - baseWorkCount;
-        document.getElementById('countBalance').textContent = balance > 0 ? '+' + balance : balance;
-    }
-
-    baseDateInput.addEventListener('change', function() {
-        localStorage.setItem('escala_baseDate', baseDateInput.value);
-        reinicios = [];
-        localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
-        render();
-    });
-
-    patternSelect.addEventListener('change', function() {
-        localStorage.setItem('escala_basePattern', patternSelect.value);
-        reinicios = [];
-        localStorage.setItem('escala_reinicios', JSON.stringify(reinicios));
-        render();
-    });
-
-    viewMonthInput.addEventListener('change', render);
-    render();
-</script>
-</body>
-</html>
+            if (decoded.n) localStorage.setItem('escala_notes', JSON.stringify(decoded.
